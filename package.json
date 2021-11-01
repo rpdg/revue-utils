@@ -1,9 +1,13 @@
 {
 	"name": "@rpdg/revue-utils",
-	"version": "1.0.2",
+	"version": "1.0.5",
 	"description": "A typescript library for react and vue",
 	"bugs": "https://github.com/rpdg/revue-utils/issues",
 	"homepage": "https://github.com/rpdg/revue-utils",
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org/",
+		"access": "public"
+	},
 	"keywords": [
 		"javascript",
 		"typescript",
@@ -15,7 +19,6 @@
 		"url": "git+https://github.com/rpdg/revue-utils.git"
 	},
 	"private": false,
-	"main": "src/index.ts",
 	"author": "Lyu PF",
 	"license": "MIT",
 	"dependencies": {

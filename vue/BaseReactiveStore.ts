@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import JsonStorage from '../utils/JsonStorage';
+import JsonStorage from '../JsonStorage';
 
 export function log<C>(target: C, propertyName: string) {
 	let value: any;
