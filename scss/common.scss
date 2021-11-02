@@ -1,0 +1,23 @@
+@import 'base';
+
+@each $var in $fontClass {
+	$class: nth($var, 1);
+	$size: nth($var, 2);
+	.text-#{$class} {
+		font-size: $size;
+	}
+}
+
+@each $cols in 2, 3, 4, 5 {
+	.gridCols#{$cols} {
+		@include wrapGrid($cols);
+	}
+}
+
+.rectangleItem {
+	@include wrapGridItem(16, 9);
+}
+
+.squareItem {
+	@include wrapGridItem(1, 1);
+}

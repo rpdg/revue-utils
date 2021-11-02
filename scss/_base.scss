@@ -1,0 +1,71 @@
+@use 'sass:math';
+
+@mixin clipText($lines, $lineHeight: 1.3em) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: $lines; /* number of lines to show */
+	-webkit-box-orient: vertical;
+	// fallback
+	max-height: $lines * $lineHeight;
+	line-height: $lineHeight;
+}
+
+@mixin wrapGrid($cols, $rows: 1) {
+	display: grid;
+	grid-template-columns: repeat($cols, 1fr);
+	grid-template-rows: repeat($rows, 1fr);
+	grid-gap: 20px;
+	align-items: flex-start;
+	text-align: center;
+}
+
+@mixin wrapGridItem($Rw, $Rh) {
+	aspect-ratio: math.div($Rw, $Rh);
+	overflow: hidden;
+
+	> img {
+		width: 100%;
+		height: 100%;
+
+		background-repeat: no-repeat;
+		background-size: contain;
+		background-position: center center;
+	}
+}
+
+
+$fontClass: (big 36px) (normal 30px);
+
+
+//*------------ vmin -------------*/
+$baseWidth: 750;
+
+@function stripUnit($value) {
+	@return math.div($value, ($value * 0 + 1));
+}
+
+@function vmin($target) {
+	@return math.div(stripUnit($target), stripUnit($baseWidth)) * 100vmin;
+}
+
+//*---------- ripple effect -----------*/
+@mixin Ripple($bgColor, $calcDark: false) {
+	background-color: $bgColor;
+	background-position: center;
+	transition: background 0.6s;
+
+	&:hover {
+		background: $bgColor radial-gradient(circle, transparent 1%, $bgColor 1%) center/15000%;
+	}
+	&:active {
+		@if $calcDark {
+			background-color: darken($bgColor, 10%);
+		} @else {
+			background-color: lighten($bgColor, 10%);
+		}
+
+		background-size: 100%;
+		transition: background 0s;
+	}
+}

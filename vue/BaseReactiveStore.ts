@@ -50,26 +50,36 @@ export function loader(
 
 	descriptor.value = async function (this: BaseStore, ...rest) {
 		try {
+			this.loading_acts++;
 			this.loading = true;
 			return await method.call(this, ...rest);
 		} catch (e) {
 			// alert(e.message);
 			throw e;
 		} finally {
-			this.loading = false;
+			if (this.loading_acts > 0) {
+				this.loading_acts--;
+			}
+
+			if (this.loading_acts < 1) {
+				this.loading_acts = 0;
+				this.loading = false;
+			}
 		}
 	};
 }
 
 export function seal(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
+	Object.seal(constructor);
+	Object.seal(constructor.prototype);
 }
 
 export default abstract class BaseStore {
+	loading_acts: number;
 	loading: boolean;
 
 	constructor() {
+		this.loading_acts = 0;
 		this.loading = false;
 		return reactive(this);
 	}
