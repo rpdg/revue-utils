@@ -10,21 +10,25 @@ export function loader(
 ) {
 	let method = descriptor.value!;
 
-	descriptor.value = async function (this: BaseStore, ...rest) {
+	descriptor.value = async function (this: BaseStore & { __loading_acts: number }, ...rest) {
+		if (this.__loading_acts === undefined) {
+			this.__loading_acts = 0;
+		}
+		
 		try {
-			this.loading_acts++;
+			this.__loading_acts++;
 			this.loading = true;
 			return await method.call(this, ...rest);
 		} catch (e) {
 			// alert(e.message);
 			throw e;
 		} finally {
-			if (this.loading_acts > 0) {
-				this.loading_acts--;
+			if (this.__loading_acts > 0) {
+				this.__loading_acts--;
 			}
 
-			if (this.loading_acts < 1) {
-				this.loading_acts = 0;
+			if (this.__loading_acts < 1) {
+				this.__loading_acts = 0;
 				this.loading = false;
 			}
 		}
@@ -32,11 +36,9 @@ export function loader(
 }
 
 export default abstract class BaseStore {
-	loading_acts: number;
 	loading: boolean;
 
 	constructor() {
-		this.loading_acts = 0;
 		this.loading = false;
 		return reactive(this);
 	}
