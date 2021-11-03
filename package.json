@@ -1,6 +1,6 @@
 {
 	"name": "@rpdg/revue-utils",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "A typescript library for react and vue",
 	"bugs": "https://github.com/rpdg/revue-utils/issues",
 	"homepage": "https://github.com/rpdg/revue-utils",
@@ -22,6 +22,8 @@
 	"author": "Lyu PF",
 	"license": "MIT",
 	"dependencies": {
+		"@types/lodash": "^4.14.176",
+		"lodash": "^4.17.21",
 		"vue": "^3.2.20",
 		"wechat-jssdk-ts": "1.6.0-dev.1"
 	}

@@ -1,1 +1,2 @@
-### A typescript library for react and vue
+## A typescript library for react.js and vue.js
+
