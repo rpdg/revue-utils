@@ -238,19 +238,25 @@ export function deprecated(deprecationReason: string) {
 	};
 }
 
-export function log<C>(target: C, propertyName: string) {
-	let value: any;
+/**
+ * Add log while value changes
+ * @log
+ * name:string;
+ * 
+ */
+export function log<C>(target: C, propertyKey: string, propertyDescriptor: PropertyDescriptor) {
+	let oldValue: any;
 
-	Object.defineProperty(target, propertyName, {
+	Object.defineProperty(target, propertyKey, {
 		enumerable: true, //对象属性是否可通过for-in和 Object.keys()，flase为不可循环，默认值为true
 		configurable: true, //能否使用delete、能否需改属性特性、或能否修改访问器属性、，false为不可重新定义，默认值为true
 		set: function (this: any, newValue: any) {
-			console.log(`[LOG] set ${propertyName}: `, value, '-->', newValue);
+			console.log(`[LOG] set ${propertyKey}: `, oldValue, '-->', newValue);
 			// console.log(`[LOG] whole data: `, this);
-			value = newValue;
+			oldValue = newValue;
 		},
 		get: function () {
-			return value;
+			return oldValue;
 		},
 	});
 }
