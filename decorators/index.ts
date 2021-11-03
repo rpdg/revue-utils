@@ -5,6 +5,7 @@ import {
 	throttle as throttleFn,
 	ThrottleSettings
 } from 'lodash';
+import JsonStorage from '../JsonStorage';
 
 /**
  * automatically bind methods to class instances
@@ -235,4 +236,60 @@ export function deprecated(deprecationReason: string) {
 			},
 		};
 	};
+}
+
+export function log<C>(target: C, propertyName: string) {
+	let value: any;
+
+	Object.defineProperty(target, propertyName, {
+		enumerable: true, //对象属性是否可通过for-in和 Object.keys()，flase为不可循环，默认值为true
+		configurable: true, //能否使用delete、能否需改属性特性、或能否修改访问器属性、，false为不可重新定义，默认值为true
+		set: function (this: any, newValue: any) {
+			console.log(`[LOG] set ${propertyName}: `, value, '-->', newValue);
+			// console.log(`[LOG] whole data: `, this);
+			value = newValue;
+		},
+		get: function () {
+			return value;
+		},
+	});
+}
+
+export enum PersistType {
+	STORAGE = 1,
+	SESSION,
+}
+/**
+ * 持久化到locale storage
+ * 
+ *  @persist(AUTH_TOKEN)
+	token: string;
+
+	@persist(USER_PROFILE)
+	user?: IUser;
+ */
+export function persist(storeKey: string, type: PersistType = 1): PropertyDecorator {
+	return function (this: any, target: Object, propertyName: string | symbol) {
+		let _val: any;
+
+		Object.defineProperty(target, propertyName, {
+			get: () => _val,
+			set: function (newVal) {
+				_val = newVal;
+				console.log('[JsonStorage]', propertyName, newVal);
+				if (type === PersistType.STORAGE) {
+					JsonStorage.set(storeKey, newVal);
+				} else {
+					JsonStorage.setSession(storeKey, newVal);
+				}
+			},
+			enumerable: true,
+			configurable: true,
+		});
+	};
+}
+
+export function seal(constructor: Function) {
+	Object.seal(constructor);
+	Object.seal(constructor.prototype);
 }
