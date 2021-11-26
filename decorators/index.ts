@@ -44,7 +44,7 @@ export function bind(target: any, key: string, descriptor: TypedPropertyDescript
 			definingProperty = false;
 			return boundFn;
 		},
-		set(value) {
+		set(value:(...params: any) => any) {
 			fn = value;
 		},
 	};
@@ -63,7 +63,7 @@ export function debounce(milliseconds: number = 0, options?: DebounceSettings): 
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		const map = new WeakMap();
 		const originalMethod = descriptor.value;
-		descriptor.value = function (...params) {
+		descriptor.value = function (...params:any[]) {
 			let debounced = map.get(this);
 			if (!debounced) {
 				debounced = debounceFn(originalMethod, milliseconds, options).bind(this);
@@ -115,7 +115,7 @@ export function delay(milliseconds: number = 0): any {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		const originalMethod = descriptor.value;
 
-		descriptor.value = function (...args) {
+		descriptor.value = function (...args:any[]) {
 			setTimeout(() => {
 				originalMethod.apply(this, args);
 			}, milliseconds);
