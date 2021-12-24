@@ -24,7 +24,7 @@ export default class JsonFormData {
 		let self = this,
 			accessorRegex = /\[(.*?)]/g,
 			matches: RegExpExecArray | null,
-			accessors = [],
+			accessors : any[] = [],
 			firstKeyReg = path.match(/(.+?)\[/),
 			firstKey = firstKeyReg ? firstKeyReg[1] : path;
 

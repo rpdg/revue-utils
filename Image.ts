@@ -190,7 +190,7 @@ export const checkCanvasMime = (canvas: HTMLCanvasElement) => {
 export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement) => {
 	canvas.toBlob(
 		(blob) => {
-			let url = URL.createObjectURL(blob);
+			let url = URL.createObjectURL(blob!);
 			img.src = url;
 		},
 		'image/jpeg',
