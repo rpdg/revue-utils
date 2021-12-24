@@ -1,16 +1,28 @@
 // @ts-nocheck
 
 export default {
-	hashKeysToArray: function (obj: Object): string[] {
+
+	/**
+	 * 某key-value对讲某个属性转成数组
+	 * @param arr
+	 * @param prop
+	 */
+	hashKeysToArray: function (obj: { [key: string]: any }): string[] {
 		if (Object.keys) {
 			return Object.keys(obj);
 		} else {
-			let arr: any[] = [];
+			let arr: string[] = [];
 			for (arr[arr.length] in obj);
 			return arr;
 		}
 	},
-	hashToArray: (obj: any, converter?: Function): any[] => {
+
+	/**
+	 * 某key-value对以属性转成数组
+	 * @param arr
+	 * @param prop
+	 */
+	hashToArray: <T>(obj: any, converter?: (key: string, val: any) => T): T[] => {
 		let arr = [];
 		for (let key in obj) {
 			let val = obj[key];
@@ -20,6 +32,11 @@ export default {
 		}
 		return arr;
 	},
+	/**
+	 * 数组以某属性转成key-value对
+	 * @param arr
+	 * @param prop
+	 */
 	arrayToHash: function <T>(arr: Array<T>, key: string): { [key: string]: T } {
 		let obj = {},
 			i = 0,
