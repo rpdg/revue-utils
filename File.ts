@@ -57,7 +57,7 @@ function format_number(num: number, decimals: number, dec_point = ',', thousands
 		sep = typeof thousands_sep === 'undefined' ? ',' : thousands_sep,
 		dec = typeof dec_point === 'undefined' ? '.' : dec_point,
 		//s = '',
-		toFixedFix = function (n, prec) {
+		toFixedFix = function (n:number, prec:number) {
 			let k = Math.pow(10, prec);
 			return '' + (Math.round(n * k) / k).toFixed(prec);
 		};
