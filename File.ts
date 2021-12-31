@@ -21,6 +21,11 @@ export const fileSize = function (filesize: number) {
 	return sizeStr;
 };
 
+export const FileTypes_Word = ['DOC', 'DOCX', 'DOTX'];
+export const FileTypes_Excel = ['XLSX', 'XLSB', 'XLS', 'XLSM'];
+export const FileTypes_Powerpoint = ['PPTX', 'PPSX', 'PPT', 'PPS', 'POTX', 'PPSM'];
+export const FileTypes_Office = [...FileTypes_Word, ...FileTypes_Excel, ...FileTypes_Powerpoint];
+
 function format_number(num: number, decimals: number, dec_point = ',', thousands_sep = '') {
 	//   example 1: number_format(1234.56);
 	//   returns 1: '1,235'
@@ -57,7 +62,7 @@ function format_number(num: number, decimals: number, dec_point = ',', thousands
 		sep = typeof thousands_sep === 'undefined' ? ',' : thousands_sep,
 		dec = typeof dec_point === 'undefined' ? '.' : dec_point,
 		//s = '',
-		toFixedFix = function (n:number, prec:number) {
+		toFixedFix = function (n: number, prec: number) {
 			let k = Math.pow(10, prec);
 			return '' + (Math.round(n * k) / k).toFixed(prec);
 		};
