@@ -11,10 +11,15 @@ Attaching an event when the component is mounted and activated, then removing th
 
 ```javascript
 import { ref } from 'vue';
-import { useEventListener } from '@vant/use';
+import { useEventListener , useClickAway } from '@rpdg/revue-utils/vue/use';
 
 export default {
   setup() {
+	const root = ref();
+	useClickAway(root, () => {
+      console.log('click outside!');
+    });
+	
     // attach the resize event to window
     useEventListener('resize', () => {
       console.log('window resize');

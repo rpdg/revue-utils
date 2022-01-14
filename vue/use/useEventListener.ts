@@ -1,5 +1,5 @@
 import { isRef, onDeactivated, onUnmounted, Ref, unref, watch } from 'vue';
-import { onMountedOrActivated } from './onMountedOrActivated';
+import { onMountedOrActivated } from '../onMountedOrActivated';
 
 type TargetRef = EventTarget | Ref<EventTarget | undefined>;
 
