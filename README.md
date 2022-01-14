@@ -6,6 +6,32 @@
 npm i -S @rpdg/revue-utils
 ```
 
+### vue/useEventListener
+Attaching an event when the component is mounted and activated, then removing the event when the component is unmounted and deactivated.
+
+```javascript
+import { ref } from 'vue';
+import { useEventListener } from '@vant/use';
+
+export default {
+  setup() {
+    // attach the resize event to window
+    useEventListener('resize', () => {
+      console.log('window resize');
+    });
+
+    // attach the click event to the body element
+    useEventListener(
+      'click',
+      () => {
+        console.log('click body');
+      },
+      { target: document.body }
+    );
+  },
+};
+```
+
 ### wechat
 
 ```javascript
