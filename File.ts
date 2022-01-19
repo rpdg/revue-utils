@@ -3,7 +3,14 @@ export const getFileName = function (fullName: string) {
 };
 
 export const getFileExt = function (fullName: string) {
+	if (fullName.lastIndexOf('.') === -1) {
+		return '';
+	}
 	return fullName.substr(fullName.lastIndexOf('.') + 1).toUpperCase();
+};
+
+export const normalizeSuffix = function (suffix: string) {
+	return suffix.replace(/^\./i, '').toUpperCase();
 };
 
 export const fileSize = function (filesize: number) {
@@ -29,6 +36,24 @@ export const FileTypes_Office = [...FileTypes_Word, ...FileTypes_Excel, ...FileT
 export const FileTypes_Image = ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP'];
 export const FileTypes_Video = ['MP4', 'WEBM', 'OGG'];
 export const FileTypes_Audio = ['MP3', 'WAV', 'MIDI'];
+
+
+export function isOffice(suffix: string) {
+	let s = normalizeSuffix(suffix);
+	return FileTypes_Office.indexOf(s) > -1;
+}
+export function isImg(suffix: string) {
+	let s = normalizeSuffix(suffix);
+	return FileTypes_Image.indexOf(s) > -1;
+}
+export function isAudio(suffix: string) {
+	let s = normalizeSuffix(suffix);
+	return FileTypes_Audio.indexOf(s) > -1;
+}
+export function isVideo(suffix: string) {
+	let s = normalizeSuffix(suffix);
+	return FileTypes_Video.indexOf(s) > -1;
+}
 
 function format_number(num: number, decimals: number, dec_point = ',', thousands_sep = '') {
 	//   example 1: number_format(1234.56);
