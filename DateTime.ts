@@ -19,12 +19,12 @@ export default {
 		let o = {
 			'M+': date.getMonth() + 1, //month
 			'd+': date.getDate(), //date
-			'h+': (date.getHours() > 12 ? date.getHours() - 12 : date.getHours()), //hour 12
+			'h+': date.getHours() > 12 ? date.getHours() - 12 : date.getHours(), //hour 12
 			'H+': date.getHours(), //hour 24
 			'm+': date.getMinutes(), //minute
 			's+': date.getSeconds(), //second
 			'q+': Math.floor((date.getMonth() + 3) / 3), //quarter
-			'S': date.getMilliseconds(), //millisecond
+			S: date.getMilliseconds(), //millisecond
 		};
 
 		if (/(y+)/.test(formatPatten)) {
@@ -35,7 +35,10 @@ export default {
 
 		for (k in o) {
 			if (new RegExp('(' + k + ')').test(formatPatten)) {
-				formatPatten = formatPatten.replace(RegExp.$1, RegExp.$1.length === 1 ? o[ k ].toString() : ('00' + o[ k ]).substr(('' + o[ k ]).length));
+				formatPatten = formatPatten.replace(
+					RegExp.$1,
+					RegExp.$1.length === 1 ? o[k].toString() : ('00' + o[k]).substr(('' + o[k]).length)
+				);
 			}
 		}
 
@@ -46,3 +49,16 @@ export default {
 export const Hour = 3600e3;
 export const Minute = 60e3;
 export const Second = 1e3;
+export const Millisecond = 1;
+
+/**
+ *
+ * @param t 毫秒
+ * @param v return value
+ * @returns
+ */
+export function sleep<T>(t: number, v?: T): Promise<T> {
+	return new Promise(function (resolve) {
+		setTimeout(resolve.bind(null, v), t);
+	});
+}

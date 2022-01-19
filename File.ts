@@ -26,6 +26,10 @@ export const FileTypes_Excel = ['XLSX', 'XLSB', 'XLS', 'XLSM'];
 export const FileTypes_Powerpoint = ['PPTX', 'PPSX', 'PPT', 'PPS', 'POTX', 'PPSM'];
 export const FileTypes_Office = [...FileTypes_Word, ...FileTypes_Excel, ...FileTypes_Powerpoint];
 
+export const FileTypes_Image = ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP'];
+export const FileTypes_Video = ['MP4', 'WEBM', 'OGG'];
+export const FileTypes_Audio = ['MP3', 'WAV', 'MIDI'];
+
 function format_number(num: number, decimals: number, dec_point = ',', thousands_sep = '') {
 	//   example 1: number_format(1234.56);
 	//   returns 1: '1,235'

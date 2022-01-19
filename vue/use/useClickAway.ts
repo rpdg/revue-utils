@@ -5,6 +5,12 @@ export type UseClickAwayOptions = {
   eventName?: string;
 };
 
+/**
+ * Triggers a callback when user clicks outside of the target element.
+ * @param target Element | Ref<Element | undefined>
+ * @param listener EventListener
+ * @param options Options?
+ */
 export function useClickAway(
   target: Element | Ref<Element | undefined>,
   listener: EventListener,
