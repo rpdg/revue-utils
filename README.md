@@ -39,6 +39,7 @@ export default {
 
 ### wechat
 
+1. convert wechat local ids to image files
 ```javascript
 import {localIdsToFiles} from '@rpdg/revue-utils/Wechat';
 wx.chooseImage({
@@ -49,13 +50,28 @@ wx.chooseImage({
 });
 ```
 
+2. initial wechat js sdk
+```javascript
+import {readyAsync} from '@rpdg/revue-utils/Wechat';
+async function init(){
+  await readyAsync(cfg);
+}
+```
+
+3. wechat share
+```javascript
+import {shareAsync} from '@rpdg/revue-utils/Wechat';
+async function init(){
+  await shareAsync(['timeline', 'appMessage'], options);
+}
+```
 
 
-### pinyin
+### Chinese pinyin
 
 ```javascript
 import py from '@rpdg/revue-utils/Pinyin';
 let testStr = '中文';
-console.log(py(testStr));
+console.log(py(testStr)); // output: zhongwen
 ```
 
