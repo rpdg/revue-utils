@@ -21,3 +21,63 @@
 .squareItem {
 	@include wrapGridItem(1, 1);
 }
+
+@each $size in 12, 13, 14, 15, 16, 18 {
+	.text-#{$size} {
+		font-size: #{$size}px;
+	}
+}
+
+@each $pad in 10, 15, 20 {
+	// margin classes
+	.mg-l-#{$pad} {
+		margin-left: #{$pad}px;
+	}
+	.mg-r-#{$pad} {
+		margin-right: #{$pad}px;
+	}
+	.mg-x-#{$pad} {
+		@extend .mg-l-#{$pad};
+		@extend .mg-r-#{$pad};
+	}
+	.mg-t-#{$pad} {
+		margin-top: #{$pad}px;
+	}
+	.mg-b-#{$pad} {
+		margin-bottom: #{$pad}px;
+	}
+	.mg-y-#{$pad} {
+		@extend .mg-t-#{$pad};
+		@extend .mg-b-#{$pad};
+	}
+	.mg-#{$pad} {
+		@extend .mg-y-#{$pad};
+		@extend .mg-x-#{$pad};
+	}
+
+	// padding classes
+	.pd-l-#{$pad} {
+		padding-left: #{$pad}px;
+	}
+	.pd-r-#{$pad} {
+		padding-right: #{$pad}px;
+	}
+	.pd-x-#{$pad} {
+		@extend .pd-l-#{$pad};
+		@extend .pd-r-#{$pad};
+	}
+	.pd-t-#{$pad} {
+		padding-top: #{$pad}px;
+	}
+	.pd-b-#{$pad} {
+		padding-bottom: #{$pad}px;
+	}
+	.pd-y-#{$pad} {
+		@extend .pd-t-#{$pad};
+		@extend .pd-b-#{$pad};
+	}
+	.pd-#{$pad} {
+		@extend .pd-y-#{$pad};
+		@extend .pd-x-#{$pad};
+	}
+}

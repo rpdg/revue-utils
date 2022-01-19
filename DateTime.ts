@@ -59,6 +59,6 @@ export const Millisecond = 1;
  */
 export function sleep<T>(t: number, v?: T): Promise<T> {
 	return new Promise(function (resolve) {
-		setTimeout(resolve.bind(null, v), t);
+		setTimeout(resolve.bind(null, v as any), t);
 	});
 }
