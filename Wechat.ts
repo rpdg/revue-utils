@@ -73,15 +73,18 @@ export async function localIdsToFiles(
 	localIds: string[],
 	maxSize: number = 1280,
 	compressLevel: number = 0.8
-): Promise<FileUriPaire[]> {
-	let filePaires: FileUriPaire[] = [];
+): Promise<{ files: File[]; uries: string[] }> {
+
+	let result: { files: File[]; uries: string[] } = { files: [], uries: [] };
+
 	for (let i = 0; i < localIds.length; i++) {
 		const localId = localIds[i];
 		let filePaire = await localIdToFile(localId, maxSize, compressLevel);
-		filePaires.push(filePaire);
+		result.files.push(filePaire.file);
+		result.uries.push(filePaire.uri);
 	}
 
-	return filePaires;
+	return result;
 }
 
 /**
@@ -105,7 +108,7 @@ export type PayResultType = 'ok' | 'cancel' | 'fail';
 export const readyAsync = (config: wx.ConfigOptions) => {
 	return new Promise((resolve, reject) => {
 		wx.config(config);
-        // @ts-ignore
+		// @ts-ignore
 		wx.ready(resolve);
 		wx.error(reject);
 	});
