@@ -1,13 +1,5 @@
 @import 'base';
 
-@each $var in $fontClass {
-	$class: nth($var, 1);
-	$size: nth($var, 2);
-	.text-#{$class} {
-		font-size: $size;
-	}
-}
-
 @each $cols in 2, 3, 4, 5 {
 	.gridCols#{$cols} {
 		@include wrapGrid($cols);
@@ -22,10 +14,53 @@
 	@include wrapGridItem(1, 1);
 }
 
+@each $var in $fontClass {
+	$class: nth($var, 1);
+	$size: nth($var, 2);
+	.text-#{$class} {
+		font-size: $size;
+	}
+}
+
 @each $size in 12, 13, 14, 15, 16, 18 {
 	.text-#{$size} {
 		font-size: #{$size}px;
 	}
+}
+
+.text-center {
+	text-align: center;
+}
+.text-left {
+	text-align: left;
+}
+.text-right {
+	text-align: right;
+}
+
+.text-bold {
+	font-weight: 600;
+}
+.text_underline {
+	text-decoration: underline;
+}
+
+.word-break {
+	word-wrap: break-word;
+}
+
+.clip_1_line {
+	@include clipText(1);
+}
+.clip_2_line {
+	@include clipText(2);
+}
+
+.fl_right {
+	float: right;
+}
+.fl_left {
+	float: left;
 }
 
 @each $pad in 10, 15, 20 {
