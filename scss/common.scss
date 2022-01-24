@@ -41,7 +41,7 @@
 .text-bold {
 	font-weight: 600;
 }
-.text_underline {
+.text-underline {
 	text-decoration: underline;
 }
 
@@ -49,17 +49,17 @@
 	word-wrap: break-word;
 }
 
-.clip_1_line {
+.clip-line1 {
 	@include clipText(1);
 }
-.clip_2_line {
+.clip-line2 {
 	@include clipText(2);
 }
 
-.fl_right {
+.fl-right {
 	float: right;
 }
-.fl_left {
+.fl-left {
 	float: left;
 }
 
