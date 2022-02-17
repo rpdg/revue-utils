@@ -117,3 +117,25 @@
 		@extend .pd-x-#{$pad};
 	}
 }
+
+
+
+$odd-row-bg : #fafafa;
+$even-row-bg : #fff;
+$row-hover-bg : #edfaff;
+.table-striped {
+	tbody {
+		> tr {
+			&:nth-of-type(odd) {
+				background-color: $odd-row-bg ;
+			}
+			&:nth-of-type(even){
+				// background-color: $even-row-bg;
+			}
+			
+			&:nth-of-type(odd):hover,&:nth-of-type(even):hover {
+				// background-color: $row-hover-bg;
+			}
+		}
+	}
+}
