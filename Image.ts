@@ -151,10 +151,10 @@ export function getImageSurfix(dataURI: string): string {
 	return '.' + mimeString.substr(6);
 }
 
-export const downloadImage = (img: HTMLImageElement, downName?: string) => {
+export const downloadImage = (img: HTMLImageElement, downName: string = 'download.jpg') => {
 	let link = document.createElement('a');
 	link.href = img.src;
-	link.download = downName ?? 'download.jpg';
+	link.download = downName;
 	link.style.display = 'none';
 	document.body.appendChild(link);
 	link.click();

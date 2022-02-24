@@ -37,9 +37,9 @@ export default {
 };
 ```
 
-### wechat
+### wechat utils
 
-1. convert wechat local ids to image files
+1. convert wechat local image ids to image files
 ```javascript
 import {localIdsToFiles} from '@rpdg/revue-utils/Wechat';
 wx.chooseImage({
@@ -66,6 +66,13 @@ async function init(){
 }
 ```
 
+4. wechat pay
+
+	```js
+	import {payAsync} from '@rpdg/revue-utils/Wechat';
+	// ...
+	await payAsync(options);
+	```
 
 ### Chinese pinyin
 
@@ -75,3 +82,20 @@ let testStr = '中文';
 console.log(py(testStr)); // output: zhongwen
 ```
 
+### Image utils
+
+1. checkExists 
+
+	```js
+	import {checkExists} from '@rpdg/revue-utils/Image';
+	await checkExists('https://www.google.com/images/branding/googlelogo_92x30dp.png');
+	```
+
+2. imgCompress
+
+	```js
+	import {imgCompress} from '@rpdg/revue-utils/Image';
+	await imgCompress(srcBase64 , 1280 , 0.9);
+	```
+
+	
