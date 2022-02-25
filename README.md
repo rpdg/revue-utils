@@ -98,4 +98,32 @@ console.log(py(testStr)); // output: zhongwen
 	await imgCompress(srcBase64 , 1280 , 0.9);
 	```
 
-	
+### JsonStorage
+```js
+import JsonStorage from '@rpdg/revue-utils/JsonStorage';
+type Book = {
+  title:string;
+  isbn:string;
+};
+
+let book :Book = {
+  title: "Publish News Letter",
+  isbn: "978-93-8067-432-2",
+}
+
+JsonStorage.set("book", book);
+
+let book2 = JsonStorage.get<Book>("book"); // typed Book object
+
+```	
+
+
+### Math2
+fix the error of js floating point operation
+```js
+import * as Math2 from '@rpdg/revue-utils/Math';
+
+0.1+0.2; // 0.30000000000000004
+Math2.add(0.1 , 0.2); // 0.3
+
+```
