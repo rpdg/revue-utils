@@ -46,10 +46,12 @@ export default {
 	},
 };
 
-export const Hour = 3600e3;
-export const Minute = 60e3;
-export const Second = 1e3;
+
 export const Millisecond = 1;
+export const Second = 1e3;
+export const Minute = 60e3;
+export const Hour = 3600e3;
+export const Day = 864e5;
 
 /**
  *

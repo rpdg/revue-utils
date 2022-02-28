@@ -16,7 +16,7 @@ export function getRandomArbitrary(min: number, max: number, decimals: number = 
  * @param arg2
  * @param d 小数位数，如果不传则不处理小数位数
  */
-export function add(arg1: number, arg2: number, d?: number) {
+export function add(arg1: number, arg2: number, d?: number): number {
 	let arg1Arr = arg1.toString().split('.'),
 		arg2Arr = arg2.toString().split('.'),
 		d1 = arg1Arr.length == 2 ? arg1Arr[1] : '',
@@ -33,7 +33,7 @@ export function add(arg1: number, arg2: number, d?: number) {
  * @param arg2
  * @param d 小数位数，如果不传则不处理小数位数
  */
-export function sub(arg1: number, arg2: number, d?: number) {
+export function sub(arg1: number, arg2: number, d?: number): number {
 	return add(arg1, -arg2, d);
 }
 
@@ -43,7 +43,7 @@ export function sub(arg1: number, arg2: number, d?: number) {
  * @param arg2
  * @param d 小数位数，如果不传则不处理小数位数
  */
-export function mul(arg1: number, arg2: number, d?: number) {
+export function mul(arg1: number, arg2: number, d?: number): number {
 	let r1 = arg1.toString(),
 		r2 = arg2.toString();
 	let m: number = (r1.split('.')[1] ? r1.split('.')[1].length : 0) + (r2.split('.')[1] ? r2.split('.')[1].length : 0);
@@ -57,8 +57,8 @@ export function mul(arg1: number, arg2: number, d?: number) {
  * @param arg2
  * @param d 小数位数，如果不传则不处理小数位数
  */
-export function div(arg1: number, arg2: number, d?: number) {
-	let resultVal;
+export function div(arg1: number, arg2: number, d?: number): number {
+	let resultVal: number;
 	if (arg2 === 0) {
 		resultVal = 0;
 	} else {
@@ -71,16 +71,30 @@ export function div(arg1: number, arg2: number, d?: number) {
 }
 
 /**
+ * 平均数
+ * @param arr
+ * @returns
+ */
+export function avg(arr: number[]): number {
+	let sum = 0;
+	for (let i = 0; i < arr.length; i++) {
+		sum = add(sum, arr[i]);
+	}
+	return div(sum, arr.length);
+}
+
+/**
  * 标准差, http://baike.baidu.com/view/78339.htm
  * @param arr 数字数组
  * @param avg 平均数
  * @param fix 保留小数位
  */
-export function stdEVP(arr: number[], avg: number, fix?: number) {
+export function stdEVP(arr: number[], fix?: number): number {
 	let sum = 0;
+	let av = avg(arr);
 	let l = arr.length;
 	for (let i = 0; i < l; i++) {
-		let dev = arr[i] - avg;
+		let dev = arr[i] - av;
 		sum += dev * dev;
 	}
 	let resultVal = Math.sqrt(sum / l);
@@ -92,7 +106,7 @@ export function stdEVP(arr: number[], avg: number, fix?: number) {
  * @param array 数字数组
  * @param d 保留小数位
  */
-export function median(array: number[], d?: number) {
+export function median(array: number[], d?: number): number {
 	let l = array.length,
 		m = Math.ceil(div(l, 2)) - 1;
 	if (l % 2) {
@@ -140,9 +154,31 @@ export function format(number: number, decimals: number, dec_point: string = '.'
  * @param total
  * @param d 保留小数位，默认1
  */
-export function percent(n: number, total: number, d: number = 1) {
+export function percent(n: number, total: number, d: number = 1): string {
 	if (total == 0) {
 		return '--%';
 	}
-	return Number(Math.round((n / total) * 10000) / 100).toFixed(d) + '%';
+	return toFixed(Math.round((n / total) * 10000) / 100 , d) + '%';
+}
+
+/**
+ * 返回一个数值在指定小数点位数，四舍五入后的数值
+ * @param value 数值
+ * @param precision 保留小数位，默认1
+ * @returns
+ */
+function toFixed(value: number, precision: number = 1): number {
+	let decimalVal = '0';
+
+	if (value !== null) {
+		let appendValue =
+			value - Math.floor(value) !== 0
+				? precision <= (value.toString().split('.')[1].length || 0)
+					? '1'
+					: ''
+				: '';
+		decimalVal = parseFloat(value.toString() + appendValue).toFixed(precision);
+	}
+
+	return Number(decimalVal);
 }

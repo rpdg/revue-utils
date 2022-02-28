@@ -7,72 +7,76 @@ npm i -S @rpdg/revue-utils
 ```
 
 ### vue/useEventListener
+
 Attaching an event when the component is mounted and activated, then removing the event when the component is unmounted and deactivated.
 
 ```javascript
 import { ref } from 'vue';
-import { useEventListener , useClickAway } from '@rpdg/revue-utils/vue/use';
+import { useEventListener, useClickAway } from '@rpdg/revue-utils/vue/use';
 
 export default {
-  setup() {
-	const root = ref();
-	useClickAway(root, () => {
-      console.log('click outside!');
-    });
-	
-    // attach the resize event to window
-    useEventListener('resize', () => {
-      console.log('window resize');
-    });
+	setup() {
+		const root = ref();
+		useClickAway(root, () => {
+			console.log('click outside!');
+		});
 
-    // attach the click event to the body element
-    useEventListener(
-      'click',
-      () => {
-        console.log('click body');
-      },
-      { target: document.body }
-    );
-  },
+		// attach the resize event to window
+		useEventListener('resize', () => {
+			console.log('window resize');
+		});
+
+		// attach the click event to the body element
+		useEventListener(
+			'click',
+			() => {
+				console.log('click body');
+			},
+			{ target: document.body }
+		);
+	},
 };
 ```
 
 ### wechat utils
 
 1. convert wechat local image ids to image files
+
 ```javascript
 import {localIdsToFiles} from '@rpdg/revue-utils/Wechat';
 wx.chooseImage({
     success: async function (res: any) {
 		let localIds = res.localIds as string[];
- 		let filePaires = await localIdsToFiles(localIds); 
+ 		let filePaires = await localIdsToFiles(localIds);
 	},
 });
 ```
 
 2. initial wechat js sdk
+
 ```javascript
-import {readyAsync} from '@rpdg/revue-utils/Wechat';
-async function init(){
-  await readyAsync(cfg);
+import { readyAsync } from '@rpdg/revue-utils/Wechat';
+async function init() {
+	await readyAsync(cfg);
 }
 ```
 
 3. wechat share
+
 ```javascript
-import {shareAsync} from '@rpdg/revue-utils/Wechat';
-async function init(){
-  await shareAsync(['timeline', 'appMessage'], options);
+import { shareAsync } from '@rpdg/revue-utils/Wechat';
+async function init() {
+	await shareAsync(['timeline', 'appMessage'], options);
 }
 ```
 
 4. wechat pay
 
-	```js
-	import {payAsync} from '@rpdg/revue-utils/Wechat';
-	// ...
-	await payAsync(options);
-	```
+    ```js
+    import { payAsync } from '@rpdg/revue-utils/Wechat';
+    // ...
+    await payAsync(options);
+    ```
 
 ### Chinese pinyin
 
@@ -84,49 +88,52 @@ console.log(py(testStr)); // output: zhongwen
 
 ### Image utils
 
-1. checkExists 
+1. checkExists
 
-	```js
-	import {checkExists} from '@rpdg/revue-utils/Image';
-	await checkExists('https://www.google.com/images/branding/googlelogo_92x30dp.png');
-	```
+    ```js
+    import { checkExists } from '@rpdg/revue-utils/Image';
+    await checkExists('https://www.google.com/images/branding/googlelogo_92x30dp.png');
+    ```
 
 2. imgCompress
 
-	```js
-	import {imgCompress} from '@rpdg/revue-utils/Image';
-	await imgCompress(srcBase64 , 1280 , 0.9); // 
-	```
+    ```js
+    import { imgCompress } from '@rpdg/revue-utils/Image';
+    await imgCompress(srcBase64, 1280, 0.9); //
+    ```
 
 ### JsonStorage
+
 ```js
 import JsonStorage from '@rpdg/revue-utils/JsonStorage';
 type Book = {
-  title:string;
-  isbn:string;
+	title: string,
+	isbn: string,
 };
 
-let book :Book = {
-  title: "Publish News Letter",
-  isbn: "978-93-8067-432-2",
-}
+let book: Book = {
+	title: 'Publish News Letter',
+	isbn: '978-93-8067-432-2',
+};
 
-JsonStorage.set("book", book);
+JsonStorage.set('book', book);
 
-let book2 = JsonStorage.get<Book>("book"); // typed Book object
-
-```	
+let book2 = JsonStorage.get < Book > 'book'; // typed Book object
+```
 
 ### String
-```js
-import {padLeft , padRight} from '@rpdg/revue-utils/String';
 
-padLeft('A' , 4); // '000A'
-padRight('A' , 4); // 'A000'
+```js
+import { padLeft, padRight } from '@rpdg/revue-utils/String';
+
+padLeft('A', 4); // '000A'
+padRight('A', 4); // 'A000'
 ```
 
 ### Math2
+
 fix the error of js floating point operation
+
 ```js
 import * as Math2 from '@rpdg/revue-utils/Math';
 
@@ -137,10 +144,43 @@ Math2.add(0.1 , 0.2); // 0.3
 Math2.div(0.15, 0.2); // 0.75
 
 Math2.format(1234.5678, 2); // return: 1234.57
+
+// Median
+Math2.median([23, 29, 20, 32, 23, 21, 33, 25]); // 20
+
+// Standard Deviation
+Math2.stdEVP([0,5,9,14]); // 5.1478150704935
+Math2.stdEVP([5,6,8,9]); // 1.5811388300841898
+
+//
+Math2.percent(2 , 10); // 20.0% 
+Math2.percent(2 , 10 , 2); // 20.00% 
+Math2.percent(2 , 10 , 0); // 20% 
+Math2.percent(2 , 0); // --% 
+
+//
+Math2.toFixed(0.000000015, 8); // 0.00000001
+Math2.toFixed(859.3844, 2); // 859.38
 ```
 
 ### DateTime
+
 ```js
-import DateTime from '@rpdg/revue-utils/Math';
-DateTime.addDays(new Date() , 7); // add 7 days
+import DateTime from '@rpdg/revue-utils/DateTime';
+DateTime.addDays(new Date(), 7); // add 7 days
+DateTime.format(new Date(), 'yyyy/MM/dd HH:mm'); // 2022/02/28 10:04
+```
+
+### Array
+
+```js
+import { litterN, sortOnProp } from '@rpdg/revue-utils/Array';
+
+litterN(50, 100); // [50, 51, 52, ... 99, 100];
+
+let arr = [
+	{ age: 5, name: 'Tom' },
+	{ age: 2, name: 'Jerry' },
+];
+sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, {age:5 , name: 'Tom'}]
 ```
