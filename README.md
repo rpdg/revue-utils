@@ -95,7 +95,7 @@ console.log(py(testStr)); // output: zhongwen
 
 	```js
 	import {imgCompress} from '@rpdg/revue-utils/Image';
-	await imgCompress(srcBase64 , 1280 , 0.9);
+	await imgCompress(srcBase64 , 1280 , 0.9); // 
 	```
 
 ### JsonStorage
@@ -117,6 +117,13 @@ let book2 = JsonStorage.get<Book>("book"); // typed Book object
 
 ```	
 
+### String
+```js
+import {padLeft , padRight} from '@rpdg/revue-utils/String';
+
+padLeft('A' , 4); // '000A'
+padRight('A' , 4); // 'A000'
+```
 
 ### Math2
 fix the error of js floating point operation
@@ -126,4 +133,14 @@ import * as Math2 from '@rpdg/revue-utils/Math';
 0.1+0.2; // 0.30000000000000004
 Math2.add(0.1 , 0.2); // 0.3
 
+0.15/0.2; // 0.7499999999999999
+Math2.div(0.15, 0.2); // 0.75
+
+Math2.format(1234.5678, 2); // return: 1234.57
+```
+
+### DateTime
+```js
+import DateTime from '@rpdg/revue-utils/Math';
+DateTime.addDays(new Date() , 7); // add 7 days
 ```
