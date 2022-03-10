@@ -1,5 +1,10 @@
 @import 'base';
 
+html,
+body {
+	height: 100%;
+}
+
 @each $cols in 2, 3, 4, 5 {
 	.gridCols#{$cols} {
 		@include wrapGrid($cols);
@@ -14,13 +19,13 @@
 	@include wrapGridItem(1, 1);
 }
 
-@each $var in $fontClass {
-	$class: nth($var, 1);
-	$size: nth($var, 2);
-	.text-#{$class} {
-		font-size: $size;
-	}
-}
+// @each $var in $fontClass {
+// 	$class: nth($var, 1);
+// 	$size: nth($var, 2);
+// 	.text-#{$class} {
+// 		font-size: $size;
+// 	}
+// }
 
 @each $size in 12, 13, 14, 15, 16, 18 {
 	.text-#{$size} {
@@ -118,22 +123,25 @@
 	}
 }
 
+.hide {
+	display: none;
+}
 
-
-$odd-row-bg : #fafafa;
-$even-row-bg : #fff;
-$row-hover-bg : #edfaff;
+$odd-row-bg: #fafafa;
+$even-row-bg: #fff;
+$row-hover-bg: #edfaff;
 .table-striped {
 	tbody {
 		> tr {
 			&:nth-of-type(odd) {
-				background-color: $odd-row-bg ;
+				background-color: $odd-row-bg;
 			}
-			&:nth-of-type(even){
+			&:nth-of-type(even) {
 				// background-color: $even-row-bg;
 			}
-			
-			&:nth-of-type(odd):hover,&:nth-of-type(even):hover {
+
+			&:nth-of-type(odd):hover,
+			&:nth-of-type(even):hover {
 				// background-color: $row-hover-bg;
 			}
 		}

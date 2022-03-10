@@ -152,15 +152,15 @@ Math2.median([23, 29, 20, 32, 23, 21, 33, 25]); // 20
 Math2.stdEVP([0,5,9,14]); // 5.1478150704935
 Math2.stdEVP([5,6,8,9]); // 1.5811388300841898
 
-//
+// percents
 Math2.percent(2 , 10); // 20.0% 
 Math2.percent(2 , 10 , 2); // 20.00% 
 Math2.percent(2 , 10 , 0); // 20% 
 Math2.percent(2 , 0); // --% 
 
-//
-Math2.toFixed(0.000000015, 8); // 0.00000001
-Math2.toFixed(859.3844, 2); // 859.38
+// fixed point
+(859.385).toFixed(2); // '859.38' <- not rounding
+Math2.toFixed(859.385, 2); // 859.39 <- round
 ```
 
 ### DateTime
