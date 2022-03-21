@@ -51,3 +51,12 @@ export function padLeft(oStr: string, length: number, pad_string: string = '0'):
 export function padRight(oStr: string, length: number, pad_string: string = '0'): string {
 	return pad(oStr, length, pad_string, 'STR_PAD_RIGHT');
 }
+
+export function getRandomColor(): string {
+	let letters = '0123456789ABCDEF'.split('');
+	let color = '#';
+	for (let i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	}
+	return color;
+}
