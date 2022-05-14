@@ -1,5 +1,3 @@
-
-
 export function clone<T = any>(item: T): T {
 	if (!item) {
 		return item;
@@ -59,4 +57,39 @@ export function clone<T = any>(item: T): T {
 	}
 
 	return result;
+}
+
+/**
+ * 防抖
+ * @param handle 
+ * @param delay 
+ * @returns 
+ */
+export function debounce(handler: (args: any) => any, delay: number) {
+	let timer = 0;
+	return function () {
+		var _self = this,
+			_args = arguments;
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			handler.apply(_self, _args);
+		}, delay);
+	};
+}
+
+/**
+ * 节流
+ * @param handler 
+ * @param delay 
+ * @returns 
+ */
+export function throttle(handler: (args: any) => any, delay: number) {
+    let lastTime = 0;
+    return function () {
+        let nowTime = new Date().getTime();
+        if (nowTime - lastTime > delay) {
+            handler.apply(this, arguments);
+            lastTime = nowTime;
+        }
+    }
 }

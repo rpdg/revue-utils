@@ -158,7 +158,7 @@ export function percent(n: number, total: number, d: number = 1): string {
 	if (total == 0) {
 		return '--%';
 	}
-	return toFixed(Math.round((n / total) * 10000) / 100 , d) + '%';
+	return toFixed(Math.round((n / total) * 10000) / 100, d) + '%';
 }
 
 /**
@@ -167,7 +167,7 @@ export function percent(n: number, total: number, d: number = 1): string {
  * @param precision 保留小数位，默认1
  * @returns
  */
-function toFixed(value: number, precision: number = 1): number {
+export function toFixed(value: number, precision: number = 1): number {
 	let decimalVal = '0';
 
 	if (value !== null) {
@@ -181,4 +181,24 @@ function toFixed(value: number, precision: number = 1): number {
 	}
 
 	return Number(decimalVal);
+}
+
+/**
+ * 大数相加
+ * @param aNum
+ * @param bNum
+ * @returns
+ */
+export function sumBigNumber(aNum: string, bNum: string) {
+	let res = '', //结果
+		temp: any = 0; //按位加的结果及进位
+	let a = aNum.split('');
+	let b = bNum.split('');
+	while (a.length || b.length || temp) {
+		//~~按位非 1.类型转换，转换成数字 2.~~undefined==0
+		temp += ~~a.pop()! + ~~b.pop()!;
+		res = (temp % 10) + res;
+		temp = temp > 9;
+	}
+	return res.replace(/^0+/, '');
 }

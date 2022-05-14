@@ -8,6 +8,64 @@ export const createFragment = function (htmlStr: string): DocumentFragment {
 	return frag;
 };
 
+/**
+ * 找元素的第n级父元素
+ * @param ele
+ * @param n
+ * @returns
+ */
+export function parents(ele: Node | null, n: number) {
+	while (ele && n) {
+		ele = ele.parentElement ? ele.parentElement : ele.parentNode;
+		n--;
+	}
+	return ele;
+}
+
+/**
+ * 获得滚动条的滚动距离
+ * @returns
+ */
+export function getScrollOffset(): { x: number; y: number } {
+	if (window.pageXOffset) {
+		return {
+			x: window.pageXOffset,
+			y: window.pageYOffset,
+		};
+	} else {
+		return {
+			x: document.body.scrollLeft + document.documentElement.scrollLeft,
+			y: document.body.scrollTop + document.documentElement.scrollTop,
+		};
+	}
+}
+
+/**
+ * 获取元素的任意style属性
+ * @param elem
+ * @param prop
+ * @returns
+ */
+export function getStyle(elem: HTMLElement, prop: string) {
+	return window.getComputedStyle ? window.getComputedStyle(elem, null)[prop] : (elem as any).currentStyle[prop];
+}
+
+/**
+ * 异步加载script
+ * @param url
+ * @param callback
+ */
+export function loadScript(url: string, callback: () => void) {
+	let oscript: HTMLScriptElement = document.createElement('script');
+
+	oscript.onload = function () {
+		callback();
+	};
+
+	oscript.src = url;
+	document.body.appendChild(oscript);
+}
+
 export const download = (name: string, data: BlobPart[]) => {
 	if (!data) {
 		return;
