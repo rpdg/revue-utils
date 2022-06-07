@@ -66,13 +66,13 @@ export function clone<T = any>(item: T): T {
  * @returns 
  */
 export function debounce(handler: (args: any) => any, delay: number) {
-	let timer = 0;
-	return function () {
-		var _self = this,
+	let timer :any;
+	return function (this: Function) {
+		let _self = this,
 			_args = arguments;
 		clearTimeout(timer);
 		timer = setTimeout(function () {
-			handler.apply(_self, _args);
+			handler.call(_self, _args);
 		}, delay);
 	};
 }
@@ -85,10 +85,10 @@ export function debounce(handler: (args: any) => any, delay: number) {
  */
 export function throttle(handler: (args: any) => any, delay: number) {
     let lastTime = 0;
-    return function () {
+    return function (this: Function) {
         let nowTime = new Date().getTime();
         if (nowTime - lastTime > delay) {
-            handler.apply(this, arguments);
+            handler.call(this, arguments);
             lastTime = nowTime;
         }
     }
