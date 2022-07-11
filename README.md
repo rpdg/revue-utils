@@ -78,6 +78,8 @@ async function init() {
     await payAsync(options);
     ```
 
+
+
 ### Chinese pinyin
 
 ```javascript
@@ -85,6 +87,8 @@ import py from '@rpdg/revue-utils/Pinyin';
 let testStr = '中文';
 console.log(py(testStr)); // output: zhongwen
 ```
+
+
 
 ### Image utils
 
@@ -101,6 +105,8 @@ console.log(py(testStr)); // output: zhongwen
     import { imgCompress } from '@rpdg/revue-utils/Image';
     await imgCompress(srcBase64, 1280, 0.9); //
     ```
+
+
 
 ### JsonStorage
 
@@ -121,6 +127,8 @@ JsonStorage.set('book', book);
 let book2 = JsonStorage.get < Book > 'book'; // typed Book object
 ```
 
+
+
 ### String
 
 ```js
@@ -129,6 +137,8 @@ import { padLeft, padRight } from '@rpdg/revue-utils/String';
 padLeft('A', 4); // '000A'
 padRight('A', 4); // 'A000'
 ```
+
+
 
 ### Math2
 
@@ -163,6 +173,8 @@ Math2.percent(2 , 0); // --%
 Math2.toFixed(859.385, 2); // 859.39 <- round
 ```
 
+
+
 ### DateTime
 
 ```js
@@ -171,9 +183,11 @@ DateTime.addDays(new Date(), 7); // add 7 days
 DateTime.format(new Date(), 'yyyy/MM/dd HH:mm'); // 2022/02/28 10:04
 ```
 
+
+
 ### Array
 
-```js
+```typescript
 import { litterN, sortOnProp } from '@rpdg/revue-utils/Array';
 
 litterN(50, 100); // [50, 51, 52, ... 99, 100];
@@ -184,3 +198,35 @@ let arr = [
 ];
 sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, {age:5 , name: 'Tom'}]
 ```
+
+
+
+### Url 
+
+```typescript
+import { request ,url } from '@rpdg/revue-utils/Url';
+
+// page url : some.html?id=a01&name=tom
+console.log(reuqest['id']); // a01
+console.log(request['name']); // tom
+
+url.setParam("some.html?id=a01&name=tom", {name:'Bob'} ); // some.html?id=a01&name=Bob
+url.getParam("some.html?id=a01&name=tom" , "id"); // a01
+```
+
+
+
+### Validates
+
+```typescript
+import {is} from './Validates'
+is.Array([1,2,3]); // true
+is.Date(new Date); // true
+is.Number("123"); // false
+is.String("123"); // true
+```
+
+
+
+
+
