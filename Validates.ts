@@ -60,9 +60,9 @@ const is: {
 	HTMLDocument: emptyFn,
 };
 
-let isTypes = ['Array', 'RegExp', 'Date', 'Number', 'String', 'Object', 'HTMLDocument'];
-for (let i = 0, c: string; (c = isTypes[i++]); ) {
-	is[c] = (function (type) {
+let isTypes: (keyof typeof is)[] = ['Array', 'RegExp', 'Date', 'Number', 'String', 'Object', 'HTMLDocument'];
+for (let i = 0, c: keyof typeof is; (c = isTypes[i++]); ) {
+	is[c] = (function (type: any) {
 		return function (obj: any) {
 			return Object.prototype.toString.call(obj) == '[object ' + type + ']';
 		};
