@@ -1,4 +1,5 @@
-import wx from 'wechat-jssdk-ts';
+/// <reference path="./node_modules/wechat-jssdk-ts/index.d.ts" />
+import wx = WechatJSSDK;
 import { base64ToFile, getImageSurfix, imgCompress } from './Image';
 
 let fileNameSeed = 0;
@@ -74,7 +75,6 @@ export async function localIdsToFiles(
 	maxSize: number = 1280,
 	compressLevel: number = 0.8
 ): Promise<{ files: File[]; uries: string[] }> {
-
 	let result: { files: File[]; uries: string[] } = { files: [], uries: [] };
 
 	for (let i = 0; i < localIds.length; i++) {
