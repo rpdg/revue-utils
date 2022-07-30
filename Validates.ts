@@ -62,6 +62,7 @@ const is: {
 
 let isTypes: (keyof typeof is)[] = ['Array', 'RegExp', 'Date', 'Number', 'String', 'Object', 'HTMLDocument'];
 for (let i = 0, c: keyof typeof is; (c = isTypes[i++]); ) {
+	// @ts-ignore
 	is[c] = (function (type: any) {
 		return function (obj: any) {
 			return Object.prototype.toString.call(obj) == '[object ' + type + ']';

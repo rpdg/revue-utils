@@ -69,7 +69,7 @@ body {
 	float: left;
 }
 
-@each $pad in 5, 10, 15, 20 {
+@each $pad in 0, 5, 10, 15, 20 {
 	// margin classes
 	.mg-l-#{$pad} {
 		margin-left: #{$pad}px;
