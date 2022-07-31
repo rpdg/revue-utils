@@ -1,5 +1,4 @@
-/// <reference path="./node_modules/wechat-jssdk-ts/index.d.ts" />
-import wx = WechatJSSDK;
+import wx from 'wechat-jssdk-ts';
 import { base64ToFile, getImageSurfix, imgCompress } from './Image';
 
 let fileNameSeed = 0;
