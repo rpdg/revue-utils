@@ -12,6 +12,14 @@ export type FileUriPaire = {
 };
 
 /**
+ * 包含了文件数组和base64数组的对象
+ */
+export type FilesUrisPaire = {
+	files: File[];
+	uries: string[];
+};
+
+/**
  * 根据微信选择图像返回的localId，返回base64
  * @param localId
  */
@@ -73,7 +81,7 @@ export async function localIdsToFiles(
 	localIds: string[],
 	maxSize: number = 1280,
 	compressLevel: number = 0.8
-): Promise<{ files: File[]; uries: string[] }> {
+): Promise<FilesUrisPaire> {
 	let result: { files: File[]; uries: string[] } = { files: [], uries: [] };
 
 	for (let i = 0; i < localIds.length; i++) {
