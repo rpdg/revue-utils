@@ -31,6 +31,10 @@ export const fileSize = function (filesize: number) {
 export const FileTypes_Word = ['DOC', 'DOCX', 'DOTX'];
 export const FileTypes_Excel = ['XLSX', 'XLSB', 'XLS', 'XLSM'];
 export const FileTypes_Powerpoint = ['PPTX', 'PPSX', 'PPT', 'PPS', 'POTX', 'PPSM'];
+
+/**
+ * all uppercased office file ext names
+ */
 export const FileTypes_Office = [...FileTypes_Word, ...FileTypes_Excel, ...FileTypes_Powerpoint];
 
 export const FileTypes_Image = ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP'];

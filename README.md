@@ -80,15 +80,6 @@ async function init() {
 
 
 
-### Chinese pinyin
-
-```javascript
-import py from '@rpdg/revue-utils/Pinyin';
-let testStr = '中文';
-console.log(py(testStr)); // output: zhongwen
-```
-
-
 
 ### Image utils
 
