@@ -38,9 +38,8 @@ export const FileTypes_Powerpoint = ['PPTX', 'PPSX', 'PPT', 'PPS', 'POTX', 'PPSM
 export const FileTypes_Office = [...FileTypes_Word, ...FileTypes_Excel, ...FileTypes_Powerpoint];
 
 export const FileTypes_Image = ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP'];
-export const FileTypes_Video = ['MP4', 'WEBM', 'OGG'];
+export const FileTypes_Video = ['MP4', 'WEBM', 'OGG', 'MOV'];
 export const FileTypes_Audio = ['MP3', 'WAV', 'MIDI'];
-
 
 export function isOffice(suffix: string) {
 	let s = normalizeSuffix(suffix);
