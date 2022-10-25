@@ -6,7 +6,7 @@
  * @param level 
  */
 export function startVibrate(level: VibratePattern) {
-	navigator.vibrate?.(level);
+	window.navigator.vibrate?.(level);
 }
 
 let vibrateInterval: number;
@@ -17,8 +17,8 @@ let vibrateInterval: number;
  * @param interval
  */
 export function startPeristentVibrate(level: VibratePattern, interval: number) {
-	if (!!navigator.vibrate) {
-		vibrateInterval = setInterval(function () {
+	if (!!window.navigator.vibrate) {
+		vibrateInterval = window.setInterval(function () {
 			startVibrate(level);
 		}, interval);
 	}
@@ -28,6 +28,6 @@ export function startPeristentVibrate(level: VibratePattern, interval: number) {
  * stopVibrate() //停止震动
  */
 export function stopVibrate() {
-	if (vibrateInterval) clearInterval(vibrateInterval);
-	navigator.vibrate?.(0);
+	if (vibrateInterval) window.clearInterval(vibrateInterval);
+	window.navigator.vibrate?.(0);
 }
