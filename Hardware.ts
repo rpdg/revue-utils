@@ -5,21 +5,23 @@
   
  * @param level 
  */
-export function startVibrate(level: Iterable<number>) {
-	navigator.vibrate(level);
+export function startVibrate(level: VibratePattern) {
+	navigator.vibrate?.(level);
 }
 
 let vibrateInterval: number;
 
 /**
  * startPeristentVibrate(1000, 1500)  //持续震动
- * @param level 
- * @param interval 
+ * @param level
+ * @param interval
  */
-export function startPeristentVibrate(level: Iterable<number>, interval: number) {
-	vibrateInterval = setInterval(function () {
-		startVibrate(level);
-	}, interval);
+export function startPeristentVibrate(level: VibratePattern, interval: number) {
+	if (!!navigator.vibrate) {
+		vibrateInterval = setInterval(function () {
+			startVibrate(level);
+		}, interval);
+	}
 }
 
 /**
@@ -27,5 +29,5 @@ export function startPeristentVibrate(level: Iterable<number>, interval: number)
  */
 export function stopVibrate() {
 	if (vibrateInterval) clearInterval(vibrateInterval);
-	navigator.vibrate(0);
+	navigator.vibrate?.(0);
 }
