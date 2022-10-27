@@ -60,3 +60,11 @@ export function getRandomColor(): string {
 	}
 	return color;
 }
+
+export async function copy(txt: string) {
+	await navigator.clipboard.writeText(txt);
+}
+
+export async function paste(): Promise<string> {
+	return await navigator.clipboard.readText();
+}
