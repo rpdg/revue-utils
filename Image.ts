@@ -163,12 +163,27 @@ export const downloadImage = (img: HTMLImageElement, downName: string = 'downloa
 
 export async function checkExists(src: string): Promise<boolean> {
 	return new Promise<boolean>((resolve, reject) => {
-		let img = new Image();
+		let img: HTMLImageElement = new Image();
 		img.onload = () => {
 			resolve(true);
 		};
 		img.onerror = (error) => {
 			reject(false);
+		};
+		img.src = src;
+	});
+}
+
+export async function checkImageSize(src: string): Promise<{ width: number; height: number }> {
+	return new Promise(async (resolve, reject) => {
+		let img: HTMLImageElement = new Image();
+		img.onload = () => {
+			let width = img.naturalWidth,
+				height = img.naturalHeight;
+			resolve({ width, height });
+		};
+		img.onerror = (error) => {
+			reject(error);
 		};
 		img.src = src;
 	});
