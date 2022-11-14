@@ -18,10 +18,24 @@ const Comlink = (function Comlink() {const t=Symbol("Comlink.proxy"),n=Symbol("C
 * });
 * worker.foo().then(console.log);
  */
-export default function comlinker(func:(exports:Record<string , Function>) =>void) {
+function comlinker<F = Record<string , (...params:any)=>Promise<any>>>(func:(exports:Record<string , Function>) =>void):F {
     /*
       return Comlink.wrap(new Worker(URL.createObjectURL(new Blob(['importScripts("https://unpkg.com/comlink@4.2.0/dist/umd/comlink.min.js");var exports={},module={exports:exports};('+func+')(exports);Comlink.expose(module.exports);']))));
       */
     return Comlink.wrap(new Worker(URL.createObjectURL(new Blob(['var Comlink='+Comlink.Comlink+'(),exports={},module={exports:exports};('+func+')(exports);Comlink.expose(module.exports);']))));
 }
 
+
+/**
+ * 
+ * @example
+ * let worker = wrapWorker<{ foo: () => Promise<string> }>('foo', async () => 'bar');
+ * worker.foo().then(console.log); 
+ */
+export default function wrapWorker<T = Record<string, (p: any) => Promise<any>>>(key: string, fn: (p: any) => Promise<any>) {
+	let worker = comlinker<T>((exports) => {
+		exports[key] = fn;
+	});
+
+	return worker;
+}
