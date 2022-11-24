@@ -1,3 +1,5 @@
+import comlinker from './Comlinker';
+
 /**
  *
  * @param blob
@@ -33,6 +35,30 @@ export async function fileToBase64(file: File) {
 		reader.readAsDataURL(file);
 	});
 }
+
+/**
+ * trans an image file to base64 with web worker
+ *
+ * @example const dataUri = await fileToBase64Worker.run(file);
+ */
+export const fileToBase64Worker = comlinker<{ run: (file: File) => Promise<string> }>((exports) => {
+	exports.run = async function fileToBase64(file: File) {
+		return new Promise<string>((resolve, reject) => {
+			if (!file.type.match(/image.*/)) {
+				reject(new Error('Not an image'));
+				return;
+			}
+			let reader = new FileReader();
+			reader.onloadend = () => {
+				resolve(reader.result as string);
+			};
+			reader.onerror = (error) => {
+				reject(error);
+			};
+			reader.readAsDataURL(file);
+		});
+	};
+});
 
 /**
  * 根据base64，返回Blob
@@ -151,9 +177,17 @@ export function getImageSurfix(dataURI: string): string {
 	return '.' + mimeString.substr(6);
 }
 
-export const downloadImage = (img: HTMLImageElement, downName: string = 'download.jpg') => {
+export const downloadImage = async (img: HTMLImageElement | string, downName: string = 'download.jpg') => {
+	let imageURL: string;
+	if (typeof img === 'string') {
+		const image = await fetch(img);
+		const imageBlog = await image.blob();
+		imageURL = URL.createObjectURL(imageBlog);
+	} else {
+		imageURL = img.src;
+	}
 	let link = document.createElement('a');
-	link.href = img.src;
+	link.href = imageURL;
 	link.download = downName;
 	link.style.display = 'none';
 	document.body.appendChild(link);
