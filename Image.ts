@@ -179,15 +179,16 @@ export function getImageSurfix(dataURI: string): string {
 
 export const downloadImage = async (img: HTMLImageElement | string, downName: string = 'download.jpg') => {
 	let imageURL: string;
-	if (typeof img === 'string') {
+	if (typeof img === 'object' && 'tagName' in img && img.tagName === 'IMG') {
+		img = img.src;
+	}
+	if (typeof img === 'string' && img.startsWith('http')) {
 		const image = await fetch(img);
 		const imageBlog = await image.blob();
 		imageURL = URL.createObjectURL(imageBlog);
-	} else {
-		imageURL = img.src;
 	}
 	let link = document.createElement('a');
-	link.href = imageURL;
+	link.href = imageURL!;
 	link.download = downName;
 	link.style.display = 'none';
 	document.body.appendChild(link);
