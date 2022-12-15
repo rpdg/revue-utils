@@ -92,10 +92,26 @@ async function init() {
 
 2. imgCompress
 
-    ```js
+    ```typescript
     import { imgCompress } from '@rpdg/revue-utils/Image';
     await imgCompress(srcBase64, 1280, 0.9); //
     ```
+    
+3. checkImageSize
+
+    ```typescript
+    import { checkImageSize } from '@rpdg/revue-utils/Image';
+    let {width, height} = await checkImageSize('https://gitee.com/static/images/logo.png');
+    ```
+
+4. fileToBase64
+
+    ```typescript
+    import { fileToBase64 } from '@rpdg/revue-utils/Image';
+    await fileToBase64(imgFile);
+    ```
+
+    
 
 
 
@@ -195,7 +211,7 @@ sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, {age:5 , name: 'Tom'}]
 ### Url 
 
 ```typescript
-import { request ,url } from '@rpdg/revue-utils/Url';
+import { request , url } from '@rpdg/revue-utils/Url';
 
 // page url : some.html?id=a01&name=tom
 console.log(reuqest['id']); // a01
@@ -210,11 +226,23 @@ url.getParam("some.html?id=a01&name=tom" , "id"); // a01
 ### Validates
 
 ```typescript
-import {is} from './Validates'
+import { is } from '@rpdg/revue-utils/Validates';
 is.Array([1,2,3]); // true
 is.Date(new Date); // true
 is.Number("123"); // false
 is.String("123"); // true
+```
+
+
+
+### Hardware
+
+```typescript
+import { startVibrate , startPeristentVibrate , stopVibrate } from '@rpdg/revue-utils/Hardware';
+startVibrate(1000)   // 振动一次
+startVibrate([1000, 200, 1000, 2000, 400])  //震动多次
+startPeristentVibrate(1000, 1500)  //持续震动
+stopVibrate() //停止震动
 ```
 
 

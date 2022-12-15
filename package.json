@@ -24,7 +24,7 @@
 	"dependencies": {
 		"@types/lodash": "^4.14.176",
 		"lodash": "^4.17.21",
-		"vue": "^3.2.36",
+		"vue": "^3.2.45",
 		"wechat-jssdk-ts": "1.6.0-dev.1"
 	}
 }
