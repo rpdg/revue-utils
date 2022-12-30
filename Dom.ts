@@ -1,11 +1,11 @@
-export const createFragment = function (htmlStr: string): DocumentFragment {
+export const createFragment = function (htmlStr: string): HTMLElement[] {
 	let frag = document.createDocumentFragment();
 	let temp = document.createElement('div');
 	temp.innerHTML = htmlStr;
 	while (temp.firstChild) {
 		frag.appendChild(temp.firstChild);
 	}
-	return frag;
+	return [...frag.childNodes] as HTMLElement[];
 };
 
 /**
