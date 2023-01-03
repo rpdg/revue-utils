@@ -52,6 +52,11 @@ export function padRight(oStr: string, length: number, pad_string: string = '0')
 	return pad(oStr, length, pad_string, 'STR_PAD_RIGHT');
 }
 
+export function firstUpperCase(str: string) {
+	const firstAlphabet = new RegExp(/( |^)[a-z]/, 'g');
+	return str.toLowerCase().replace(firstAlphabet, (L) => L.toUpperCase());
+}
+
 export function getRandomColor(): string {
 	let letters = '0123456789ABCDEF'.split('');
 	let color = '#';
