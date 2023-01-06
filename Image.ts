@@ -237,14 +237,14 @@ export const checkCanvasMime = (canvas: HTMLCanvasElement) => {
 	return acceptedMimes;
 };
 
-export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement) => {
+export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
 	canvas.toBlob(
 		(blob) => {
 			let url = URL.createObjectURL(blob!);
 			img.src = url;
 		},
 		'image/jpeg',
-		0.9
+		quality
 	);
 };
 

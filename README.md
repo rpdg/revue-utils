@@ -110,8 +110,43 @@ async function init() {
     import { fileToBase64 } from '@rpdg/revue-utils/Image';
     await fileToBase64(imgFile);
     ```
+    
+5. canvasToImage
+
+    ```typescript
+    import { canvasToImage } from '@rpdg/revue-utils/Image';
+    canvasToImage(canvasElem , imgElem);    
+    ```
+    
+6. downloadImage
+
+    ```typescript
+    import { downloadImage } from '@rpdg/revue-utils/Image';
+    await downloadImage(imgElem , 'img1.jpg');
+    ```
 
     
+
+### File
+
+```typescript
+import {getFileName, getFileExt, normalizeSuffix} from '@rpdg/revue-utils/File';
+let fileFullName = 'abcd.test.jpg';
+getFileName(fileFullName); // 'abcd.test'
+getFileExt(fileFullName); // 'JPG'
+normalizeSuffix('.Docx'); // 'DOCX'
+```
+
+
+
+### DOM
+
+```typescript
+import {createFragment, download, getStyle} from '@rpdg/revue-utils/Dom';
+createFragment(`<div>abc</div><p>def</p>`);
+download('file.txt' , ['some text', '\n', 'next text']);
+getStyle(document.body, 'font-size')
+```
 
 
 
@@ -195,15 +230,18 @@ DateTime.format(new Date(), 'yyyy/MM/dd HH:mm'); // 2022/02/28 10:04
 ### Array
 
 ```typescript
-import { litterN, sortOnProp } from '@rpdg/revue-utils/Array';
+import { litterN, sortOnProp, shuffle} from '@rpdg/revue-utils/Array';
 
 litterN(50, 100); // [50, 51, 52, ... 99, 100];
 
 let arr = [
 	{ age: 5, name: 'Tom' },
 	{ age: 2, name: 'Jerry' },
+	{ age: 3, name: 'Whoever' },
 ];
-sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, {age:5 , name: 'Tom'}]
+sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, { age: 3, name: 'Whoever' }, {age:5 , name: 'Tom'}]
+
+shuffle(arr);
 ```
 
 
