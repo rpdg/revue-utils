@@ -11,11 +11,11 @@
 	line-height: $lineHeight;
 }
 
-@mixin wrapGrid($cols, $rows: 1) {
+@mixin wrapGrid($cols, $rows: 1, $gap: 20px) {
 	display: grid;
 	grid-template-columns: repeat($cols, 1fr);
 	grid-template-rows: repeat($rows, 1fr);
-	grid-gap: 20px;
+	grid-gap: $gap;
 	align-items: flex-start;
 	text-align: center;
 }
@@ -34,9 +34,7 @@
 	}
 }
 
-
 $fontClass: (big 36px) (normal 30px);
-
 
 //*------------ vmin -------------*/
 $baseWidth: 750;
