@@ -190,15 +190,48 @@ export function toFixed(value: number, precision: number = 1): number {
  * @returns
  */
 export function sumBigNumber(aNum: string, bNum: string) {
-	let res = '', //结果
-		temp: any = 0; //按位加的结果及进位
-	let a = aNum.split('');
-	let b = bNum.split('');
-	while (a.length || b.length || temp) {
-		//~~按位非 1.类型转换，转换成数字 2.~~undefined==0
-		temp += ~~a.pop()! + ~~b.pop()!;
-		res = (temp % 10) + res;
-		temp = temp > 9;
+	let res: number[] = [],
+		c = 0,
+		a = aNum.split(''),
+		b = bNum.split('');
+	let pointerA = a.length - 1,
+		pointerB = b.length - 1;
+	while (pointerA >= 0 || pointerB >= 0) {
+		let x = 0,
+			y = 0,
+			sum: number;
+		x = pointerA >= 0 ? parseInt(a[pointerA--]) : 0;
+		y = pointerB >= 0 ? parseInt(b[pointerB--]) : 0;
+		sum = x + y + c;
+		c = (sum / 10) | 0;
+		sum = sum % 10;
+		res.unshift(sum);
 	}
-	return res.replace(/^0+/, '');
+	if (c == 1) res.unshift(c);
+	return res.join('');
+}
+
+/**
+ * 产生一个包括 lower 与 upper 之间的数。 如果只提供一个参数返回一个0到提供数之间的数。
+ * 如果 floating 设为 true，或者 lower 或 upper 是浮点数，结果返回浮点数。
+ * @param lower
+ * @param upper
+ * @param floating
+ * @returns (number): 返回随机数
+ */
+export function random(lower = 0, upper: number | boolean = 1, floating = false): number {
+	if (typeof upper === 'boolean') {
+		floating = upper;
+		upper = lower;
+		lower = 0;
+	}
+	if (lower > upper) {
+		[lower, upper] = [upper, lower];
+	}
+	let range = upper - lower;
+	if (floating || lower % 1 !== 0 || upper % 1 !== 0) {
+		return Math.random() * range + lower;
+	} else {
+		return Math.floor(Math.random() * range) + lower;
+	}
 }

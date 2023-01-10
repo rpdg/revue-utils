@@ -52,9 +52,26 @@ export function padRight(oStr: string, length: number, pad_string: string = '0')
 	return pad(oStr, length, pad_string, 'STR_PAD_RIGHT');
 }
 
-export function firstUpperCase(str: string) {
-	const firstAlphabet = new RegExp(/( |^)[a-z]/, 'g');
-	return str.toLowerCase().replace(firstAlphabet, (L) => L.toUpperCase());
+export function trim(str: string, char: string = ' ') {
+	const reg = new RegExp(`^[${char}]+|[${char}]+$`, 'g');
+	return str.replace(reg, '');
+}
+
+export function capitalize(str: string) {
+	return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+export function camelCase(str: string) {
+	str = str.replace(/[\s_\-]+/g, ' ').trim();
+	return str
+		.split(' ')
+		.map(function (word, index) {
+			if (index == 0) {
+				return word;
+			}
+			return word[0].toUpperCase() + word.slice(1);
+		})
+		.join('');
 }
 
 export function getRandomColor(): string {
