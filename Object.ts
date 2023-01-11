@@ -61,12 +61,12 @@ export function clone<T = any>(item: T): T {
 
 /**
  * 防抖
- * @param handle 
- * @param delay 
- * @returns 
+ * @param handle
+ * @param delay
+ * @returns
  */
 export function debounce(handler: (args: any) => any, delay: number) {
-	let timer :any;
+	let timer: any;
 	return function (this: Function) {
 		let _self = this,
 			_args = arguments;
@@ -79,17 +79,44 @@ export function debounce(handler: (args: any) => any, delay: number) {
 
 /**
  * 节流
- * @param handler 
- * @param delay 
- * @returns 
+ * @param handler
+ * @param delay
+ * @returns
  */
 export function throttle(handler: (args: any) => any, delay: number) {
-    let lastTime = 0;
-    return function (this: Function) {
-        let nowTime = new Date().getTime();
-        if (nowTime - lastTime > delay) {
-            handler.call(this, arguments);
-            lastTime = nowTime;
-        }
-    }
+	let lastTime = 0;
+	return function (this: Function) {
+		let nowTime = new Date().getTime();
+		if (nowTime - lastTime > delay) {
+			handler.call(this, arguments);
+			lastTime = nowTime;
+		}
+	};
+}
+
+/**
+ * 分配来源对象的可枚举属性到目标对象上
+ * @example:
+	let target = {};
+	let source1 = {a: 1, b: {c: 2}};
+	let source2 = {a: 3, b: {d: 4}};
+	assignDeep(target, source1, source2);
+	console.log(target);  // {a: 3, b: {c: 2, d: 4}}
+ */
+export function assignDeep(target: any, ...sources: any[]) {
+	sources.forEach((source) => {
+		for (let key in source) {
+			if (source.hasOwnProperty(key)) {
+				if (typeof source[key] === 'object' && source[key] !== null) {
+					if (typeof target[key] !== 'object') {
+						target[key] = {};
+					}
+					assignDeep(target[key], source[key]);
+				} else {
+					target[key] = source[key];
+				}
+			}
+		}
+	});
+	return target;
 }
