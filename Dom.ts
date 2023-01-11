@@ -94,3 +94,21 @@ export function createFileList(files: File[]): FileList {
 	}
 	return b.files;
 }
+
+/**
+ * @description: open other URL (防拦截)
+ * @param {*} url
+ * @param {*} id
+ */
+export function openUrl(url: string, id: any = 'poppedWin'): void {
+	let a = document.createElement('a');
+	a.setAttribute('href', url);
+	a.setAttribute('target', '_blank');
+	a.setAttribute('id', id);
+	// 防止反复添加
+	if (!document.getElementById(id)) {
+		document.body.appendChild(a);
+	}
+	a.click();
+	document.body.removeChild(a);
+}
