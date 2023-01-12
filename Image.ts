@@ -249,3 +249,191 @@ export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, 
 };
 
 export const BlankGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+/**
+ * 接受一个图片的 URL 并返回该图片绘制的 canvas
+ * @param imageUrl
+ * @returns
+ */
+export function drawImageOnCanvas(imageUrl: string): Promise<HTMLCanvasElement> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.src = imageUrl;
+		img.crossOrigin = 'anonymous';
+		img.onload = function () {
+			const canvas = document.createElement('canvas');
+			canvas.width = img.width;
+			canvas.height = img.height;
+
+			const ctx = canvas.getContext('2d')!;
+			ctx.drawImage(img, 0, 0);
+
+			resolve(canvas);
+		};
+		img.onerror = function (error) {
+			reject(error);
+		};
+	});
+}
+
+export type IRGBA = {
+	r: number;
+	g: number;
+	b: number;
+	a: number;
+};
+
+/***
+ * 返回canvas的平均颜色
+ */
+export function getAverageColor(canvas: HTMLCanvasElement): IRGBA {
+	const ctx = canvas.getContext('2d')!;
+	const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+	let r = 0;
+	let g = 0;
+	let b = 0;
+	let a = 0;
+	for (let i = 0; i < pixels.length; i += 4) {
+		r += pixels[i];
+		g += pixels[i + 1];
+		b += pixels[i + 2];
+		a += pixels[i + 3];
+	}
+	r /= pixels.length / 4;
+	g /= pixels.length / 4;
+	b /= pixels.length / 4;
+	a /= pixels.length / 4;
+	return { r: r, g: g, b: b, a: a };
+}
+
+/**
+ * k-means 算法。这个算法可以将图像中的像素分到 k 个不同的色调类中，
+ * 然后取每类中像素数量最多的那个颜色作为该类的代表颜色，
+ * 最终得到 k 个代表颜色作为图像的平均颜色。在较大的图像精度可能较高
+ * @param imageData
+ * @param k
+ * @returns
+ */
+export function kmeans(canvas: HTMLCanvasElement, k: number): IRGBA {
+	const ctx = canvas.getContext('2d')!;
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const pixels = imageData.data;
+	const pixelCount = imageData.width * imageData.height;
+
+	// 初始化 k 个中心点
+	const centers: IRGBA[] = [];
+	for (let i = 0; i < k; i++) {
+		centers.push({
+			r: Math.floor(Math.random() * 256),
+			g: Math.floor(Math.random() * 256),
+			b: Math.floor(Math.random() * 256),
+			a: Math.floor(Math.random() * 256),
+		});
+	}
+
+	let changed: boolean;
+	do {
+		// 分配每个像素到最近的中心
+		const clusters: IRGBA[][] = Array.from({ length: k }, () => []);
+
+		for (let i = 0; i < pixelCount; i++) {
+			const r = pixels[i * 4];
+			const g = pixels[i * 4 + 1];
+			const b = pixels[i * 4 + 2];
+			const a = pixels[i * 4 + 3];
+
+			let minDistance = Infinity;
+			let clusterIndex = 0;
+			for (let j = 0; j < k; j++) {
+				const distance = (r - centers[j].r) ** 2 + (g - centers[j].g) ** 2 + (b - centers[j].b) ** 2;
+				if (distance < minDistance) {
+					minDistance = distance;
+					clusterIndex = j;
+				}
+			}
+
+			clusters[clusterIndex].push({ r, g, b, a });
+		}
+
+		// 计算新的中心
+		changed = false;
+		for (let i = 0; i < k; i++) {
+			const cluster = clusters[i];
+			if (!cluster.length) {
+				continue;
+			}
+
+			let r = 0;
+			let g = 0;
+			let b = 0;
+			let a = 0;
+			for (let j = 0; j < cluster.length; j++) {
+				r += cluster[j].r;
+				g += cluster[j].g;
+				b += cluster[j].b;
+				a += cluster[j].a;
+			}
+			r = Math.floor(r / cluster.length);
+			g = Math.floor(g / cluster.length);
+			b = Math.floor(b / cluster.length);
+			a = Math.floor(a / cluster.length);
+
+			if (r !== centers[i].r || g !== centers[i].g || b !== centers[i].b) {
+				centers[i] = { r, g, b, a };
+				changed = true;
+			}
+		}
+	} while (changed);
+
+	// return centers;
+
+	let avgColor = { r: 0, g: 0, b: 0, a: 0 };
+	centers.forEach((color) => {
+		avgColor.r += color.r;
+		avgColor.g += color.g;
+		avgColor.b += color.b;
+		avgColor.a += color.a;
+	});
+	return avgColor;
+}
+
+
+/**
+ * 返回canvas中使用最多的颜色
+ * @param canvas
+ * @returns
+ */
+export function getMostUsedColor(canvas: HTMLCanvasElement): IRGBA {
+	let colorCounts = {};
+	let maxCount = 0;
+	let mostFrequentColor: IRGBA = { r: 0, g: 0, b: 0, a: 0 };
+
+	const ctx = canvas.getContext('2d')!;
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	// 遍历所有像素
+	for (let i = 0; i < data.length; i += 4) {
+		let red = data[i];
+		let green = data[i + 1];
+		let blue = data[i + 2];
+		let alpha = data[i + 3];
+
+		// 根据 RGBA 值构造颜色字符串
+		let color = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+
+		// 统计颜色数量
+		if (colorCounts[color]) {
+			colorCounts[color]++;
+		} else {
+			colorCounts[color] = 1;
+		}
+
+		// 更新最大值
+		if (colorCounts[color] > maxCount) {
+			maxCount = colorCounts[color];
+			mostFrequentColor = { r: red, g: green, b: blue, a: alpha };
+		}
+	}
+
+	return mostFrequentColor;
+}
