@@ -13,6 +13,9 @@ body {
 
 .rectangleItem {
 	@include wrapGridItem(16, 9);
+	/**
+	微信兼容性
+	**/
 	&:after {
 		content: '';
 		display: block;
@@ -41,7 +44,7 @@ body {
 // 	}
 // }
 
-@each $size in 12, 13, 14, 15, 16, 18 {
+@each $size in 9, 10, 11, 12, 13, 14, 15, 16, 18 {
 	.text-#{$size} {
 		font-size: #{$size}px;
 	}
