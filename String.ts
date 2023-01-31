@@ -91,21 +91,21 @@ export async function paste(): Promise<string> {
 	return await navigator.clipboard.readText();
 }
 
-export function generatePassword(len: number = 10, spChar: boolean = true) {
-	let password = '';
+export function generatePassword(len = 10, spChar = true) {
 	const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
 	const numbers = '0123456789';
 	const specialCharacters = '!@#$%^&*()_+-=';
 	const charSet = upperCaseLetters + lowerCaseLetters + numbers + (spChar ? specialCharacters : '');
 
+	let password = '';
 	for (let i = 0; i < len; i++) {
 		if (i === 0) {
 			let n = Math.floor(Math.random() * upperCaseLetters.length);
-			password += n > 13 ? upperCaseLetters.substring(n, n + 1) : lowerCaseLetters.substring(n, n + 1);
+			password += n > 13 ? upperCaseLetters[n] : lowerCaseLetters[n];
 		} else {
 			let randomPoz = Math.floor(Math.random() * charSet.length);
-			password += charSet.substring(randomPoz, randomPoz + 1);
+			password += charSet[randomPoz];
 		}
 	}
 
