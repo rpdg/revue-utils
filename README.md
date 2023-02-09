@@ -1,5 +1,7 @@
 ## A typescript toy kit library for react.js and vue.js
 
+This is a tool library written in TypeScript that mainly provides encapsulation of a series of commonly used methods, including graphic processing, WeChat functions, file handling, string processing, etc.
+
 ### install
 
 ```bash
