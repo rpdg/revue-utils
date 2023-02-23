@@ -181,3 +181,11 @@ export const hideToolbar = () => {
 		window.WeixinJSBridge.call('hideToolbar');
 	});
 };
+
+/**
+ * 判断是不是在微信浏览器内
+ * @returns boolean
+ */
+export function isWX() {
+	return navigator.userAgent.indexOf('MicroMessenger') > -1;
+}
