@@ -182,10 +182,24 @@ export const hideToolbar = () => {
 	});
 };
 
+export type IPlatform = 'iOS' | 'Android' | 'wechat' | 'unkown';
+
 /**
- * 判断是不是在微信浏览器内
- * @returns boolean
+ * 判断在何种平台下
+ *
+ * (ps: 鸿蒙归于安卓)
+ * @returns 'iOS' | 'Android' | 'wechat' | 'unkown'
  */
-export function isWX() {
-	return navigator.userAgent.indexOf('MicroMessenger') > -1;
+export function platform(): IPlatform {
+	//检查用户代理
+	const ua = navigator.userAgent.toLowerCase();
+	if (/iphone|ipad|ipod/.test(ua)) {
+		return 'iOS';
+	} else if (/android/.test(ua) || /harmonyos/.test(ua)) {
+		return 'Android';
+	} else if (/micromessenger/.test(ua)) {
+		return 'wechat';
+	} else {
+		return 'unkown';
+	}
 }
