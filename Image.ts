@@ -404,7 +404,7 @@ export function kmeans(canvas: HTMLCanvasElement, k: number): IRGBA {
  * @returns
  */
 export function getMostUsedColor(canvas: HTMLCanvasElement): IRGBA {
-	let colorCounts = {};
+	let colorCounts :any = {};
 	let maxCount = 0;
 	let mostFrequentColor: IRGBA = { r: 0, g: 0, b: 0, a: 0 };
 
