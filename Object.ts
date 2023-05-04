@@ -1,3 +1,18 @@
+/**
+ * sort an object by its keys/properties, alphabetically
+ * @param unordered
+ * @returns ordered
+ */
+export function sortKeys(unordered: object): object {
+	const ordered = Object.keys(unordered)
+		.sort()
+		.reduce((obj, key) => {
+			obj[key] = unordered[key];
+			return obj;
+		}, {});
+	return ordered;
+}
+
 export function clone<T = any>(item: T): T {
 	if (!item) {
 		return item;
