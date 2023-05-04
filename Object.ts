@@ -3,10 +3,10 @@
  * @param unordered
  * @returns ordered
  */
-export function sortKeys(unordered: object): object {
+export function sortKeys<T = any>(unordered: any): T {
 	const ordered = Object.keys(unordered)
 		.sort()
-		.reduce((obj, key) => {
+		.reduce((obj :any, key:string) => {
 			obj[key] = unordered[key];
 			return obj;
 		}, {});
