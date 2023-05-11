@@ -252,10 +252,13 @@ export function isOverlapping(x1: number, x2: number, y1: number, y2: number): b
  * 两个范围重叠的长度
  * @returns 两个范围没有重叠，返回 0；否则，返回这个长度
  */
-export function getOverlapLength(x1: number, x2: number, y1: number, y2: number) {
+export function getOverlapLength(x1: number, x2: number, y1: number, y2: number): number {
 	let length = Math.min(x2, y2) - Math.max(x1, y1) + 1;
 	return Math.max(0, length);
 }
+
+// 定义一个类型别名，表示一个范围是一个包含两个数字的数组
+export type Range = [number, number];
 
 /**
  * 找出两个范围重叠的范围
@@ -266,7 +269,7 @@ export function getOverlapLength(x1: number, x2: number, y1: number, y2: number)
  *
  * @returns 如果这个范围的起点大于终点，说明两个范围没有重叠，返回null；否则，返回这个范围
  */
-export function getOverlappingRange(x1: number, x2: number, y1: number, y2: number): number[] | null {
+export function getOverlappingRange(x1: number, x2: number, y1: number, y2: number): Range | null {
 	let start = Math.max(x1, y1);
 	let end = Math.min(x2, y2);
 	if (start > end) {
@@ -274,6 +277,51 @@ export function getOverlappingRange(x1: number, x2: number, y1: number, y2: numb
 	} else {
 		return [start, end];
 	}
+}
+
+/***
+ * 合并两个范围
+ *
+ * @returns 如果这个范围的起点大于终点，说明两个范围没有交集，返回空；否则，返回这个范围
+ */
+export function getMergedRange(x1: number, x2: number, y1: number, y2: number): Range | null {
+	let start = Math.min(x1, y1);
+	let end = Math.max(x2, y2);
+	if (start > end) {
+		return null;
+	} else {
+		return [start, end];
+	}
+}
+
+/**
+ * 接受一个范围的数组作为参数，返回一个范围的数组作为结果
+ * @param ranges
+ *
+ * console.log (mergeRanges ( [[7, 10], [11, 13], [11, 15], [14, 20], [23, 39]])); // [[7, 20], [23, 39]]
+ *
+ * console.log (mergeRanges ( [[2,4], [1,6]])); // [[1, 6]]
+ *
+ * @returns
+ */
+export function mergeRanges(ranges: Range[]): Range[] {
+	// 对所有的范围按照起点进行排序
+	ranges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+	// 创建一个空的列表
+	let merged: Range[] = [];
+	// 遍历所有的范围
+	for (let r of ranges) {
+		// 如果列表为空，或者当前范围的起点大于列表中最后一个范围的终点
+		if (!merged.length || r[0] > merged[merged.length - 1][1]) {
+			// 直接将当前范围加入列表
+			merged.push(r);
+		} else {
+			// 否则，说明有重叠，更新列表中最后一个范围的终点
+			merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r[1]);
+		}
+	}
+	// 返回列表中的所有范围
+	return merged;
 }
 
 /**
