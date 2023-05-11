@@ -235,3 +235,26 @@ export function random(lower = 0, upper: number | boolean = 1, floating = false)
 		return Math.floor(Math.random() * range) + lower;
 	}
 }
+
+/**
+ * Determine Whether Two Number Ranges Overlap
+ * @param x1 range1 from
+ * @param x2 range1 to
+ * @param y1 range2 from
+ * @param y2 range2 to
+ * @returns bool
+ */
+export function isOverlapping(x1: number, x2: number, y1: number, y2: number): boolean {
+	return (x1 <= y2) && (y1 <= x2);
+}
+
+/**
+ * Determine Whether A Number is in range
+ * @param x
+ * @param min
+ * @param max
+ * @returns true if in range, otherwise false
+ */
+export function inRange(x: number, min: number, max: number): boolean {
+	return (x - min) * (x - max) <= 0;
+}
