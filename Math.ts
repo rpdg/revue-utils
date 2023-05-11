@@ -245,7 +245,35 @@ export function random(lower = 0, upper: number | boolean = 1, floating = false)
  * @returns bool
  */
 export function isOverlapping(x1: number, x2: number, y1: number, y2: number): boolean {
-	return (x1 <= y2) && (y1 <= x2);
+	return x1 <= y2 && y1 <= x2;
+}
+
+/**
+ * 两个范围重叠的长度
+ * @returns 两个范围没有重叠，返回 0；否则，返回这个长度
+ */
+export function getOverlapLength(x1: number, x2: number, y1: number, y2: number) {
+	let length = Math.min(x2, y2) - Math.max(x1, y1) + 1;
+	return Math.max(0, length);
+}
+
+/**
+ * 找出两个范围重叠的范围
+ *
+ * console.log (getOverlappingRange (1, 5, 3, 7)); // [3, 5]
+ *
+ * console.log (getOverlappingRange (1, 3, 5, 7)); // null
+ *
+ * @returns 如果这个范围的起点大于终点，说明两个范围没有重叠，返回null；否则，返回这个范围
+ */
+export function getOverlappingRange(x1: number, x2: number, y1: number, y2: number): number[] | null {
+	let start = Math.max(x1, y1);
+	let end = Math.min(x2, y2);
+	if (start > end) {
+		return null;
+	} else {
+		return [start, end];
+	}
 }
 
 /**
