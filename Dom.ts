@@ -1,3 +1,5 @@
+import { sleep } from './DateTime';
+
 export const createFragment = function (htmlStr: string): HTMLElement[] {
 	let frag = document.createDocumentFragment();
 	let temp = document.createElement('div');
@@ -111,4 +113,103 @@ export function openUrl(url: string, id: any = 'poppedWin'): void {
 	}
 	a.click();
 	document.body.removeChild(a);
+}
+
+/**
+ * wait until an element exists
+ *
+ * const elm = await waitUntilExists('.some-class' , 0);
+ *
+ * or :
+ *
+ * waitUntilExists('.some-class').then((elm) => {
+
+ *   console.log('Element is ready');
+
+ *   console.log(elm.textContent);
+
+ * });
+ */
+export function waitUntilExists(selector: string, timeoutInSecond: number = 30): Promise<Element> {
+	return new Promise((resolve, reject) => {
+		if (document.querySelector(selector)) {
+			return resolve(document.querySelector(selector)!);
+		}
+
+		let t: number;
+		if (timeoutInSecond > 0) {
+			t = setTimeout(function () {
+				observer.disconnect();
+				reject('wait element timed out');
+			}, 1e3 * timeoutInSecond);
+		}
+
+		const observer = new MutationObserver(function () {
+			if (document.querySelector(selector) != null) {
+				observer.disconnect();
+				if (timeoutInSecond > 0) {
+					clearTimeout(t);
+				}
+				resolve(document.querySelector(selector)!);
+			}
+		});
+
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+		});
+	});
+}
+
+export function isVisible(selector: string | Element) {
+	try {
+		let elem = typeof selector === 'string' ? document.querySelector(selector) : selector;
+		if (elem != null) {
+			let rect = elem.getBoundingClientRect();
+			return rect.height > 0 && rect.width > 0;
+		} else {
+			return false;
+		}
+	} catch (e) {
+		return false;
+	}
+}
+
+/**
+ * try{
+ *
+		let elm = await raceShow(['#pager a.next', '#loading'], 10);
+
+		console.log(elm);
+
+	} catch(e){
+
+		console.error('cte: ' , e);
+
+	}
+ */
+export function raceShow(selectors: string[], timeoutInSecond: number = 30): Promise<Element> {
+	return new Promise(async (resolve, reject) => {
+		let t = 0;
+		const fs = 0.1;
+		while (t < timeoutInSecond) {
+			t += fs;
+			for (let selector of selectors) {
+				if (isVisible(selector)) {
+					resolve(document.querySelector(selector)!);
+					return;
+				}
+			}
+			await sleep(1e3 * fs);
+		}
+		return reject('wait element timed out');
+	});
+}
+
+export function waitShow(selector: string, timeoutInSecond: number = 30){
+
+}
+
+export function waitHide(selector: string, timeoutInSecond: number = 30){
+
 }
