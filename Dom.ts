@@ -116,18 +116,16 @@ export function openUrl(url: string, id: any = 'poppedWin'): void {
 }
 
 /**
+ *
  * wait until an element exists
  *
+ * @example
  * const elm = await waitUntilExists('.some-class' , 0);
  *
  * or :
  *
  * waitUntilExists('.some-class').then((elm) => {
-
- *   console.log('Element is ready');
-
- *   console.log(elm.textContent);
-
+ *     console.log(elm.textContent);
  * });
  */
 export function waitUntilExists(selector: string, timeoutInSecond: number = 30): Promise<Element> {
@@ -175,41 +173,94 @@ export function isVisible(selector: string | Element) {
 	}
 }
 
+export interface IRaceShowResult {
+	element: Element;
+	selector: string;
+	index: number;
+}
 /**
+ * @example
  * try{
- *
-		let elm = await raceShow(['#pager a.next', '#loading'], 10);
-
-		console.log(elm);
-
+      let {element, selector, index} = await raceShow(['#pager a.next', '#loading'], 10);
+      console.log(element, selector, index);
 	} catch(e){
-
-		console.error('cte: ' , e);
-
-	}
+      console.error(e);
+    }
  */
-export function raceShow(selectors: string[], timeoutInSecond: number = 30): Promise<Element> {
+export function raceShow(selectors: string[], timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<IRaceShowResult> {
 	return new Promise(async (resolve, reject) => {
 		let t = 0;
-		const fs = 0.1;
 		while (t < timeoutInSecond) {
-			t += fs;
-			for (let selector of selectors) {
+			t += checkFrequencyInSecond;
+			for (let i = 0, n = selectors.length; i < n; i++) {
+				let selector = selectors[i];
 				if (isVisible(selector)) {
-					resolve(document.querySelector(selector)!);
+					resolve({
+						element: document.querySelector(selector)!,
+						selector,
+						index: i,
+					});
 					return;
 				}
 			}
-			await sleep(1e3 * fs);
+			await sleep(1e3 * checkFrequencyInSecond);
 		}
-		return reject('wait element timed out');
+		reject('wait element timed out');
+		return;
 	});
 }
 
-export function waitShow(selector: string, timeoutInSecond: number = 30){
-
+/**
+ * @example
+	try{
+        let elm = await waitShow('#loading' , 10)
+        console.log(elm);
+	} catch(e){
+        console.error(e);
+	}
+ */
+export function waitShow(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<Element> {
+	return new Promise(async (resolve, reject) => {
+		let p = false;
+		let v = false;
+		let t = 0;
+		while (!p || !v) {
+			v = isVisible(selector);
+			console.log(t, v, p);
+			if (v && !p) {
+				debugger;
+				p = v;
+			}
+			t += checkFrequencyInSecond;
+			if (t > timeoutInSecond) {
+				reject('wait element timed out');
+				return;
+			}
+			await sleep(1e3 * checkFrequencyInSecond);
+		}
+		resolve(document.querySelector(selector)!);
+		return;
+	});
 }
 
-export function waitHide(selector: string, timeoutInSecond: number = 30){
-
+export function waitHide(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<void> {
+	return new Promise(async (resolve, reject) => {
+		let p = true;
+		let v = true;
+		let t = 0;
+		while (p || v) {
+			v = isVisible(selector);
+			if (!v && p) {
+				p = v;
+			}
+			t += checkFrequencyInSecond;
+			if (t > timeoutInSecond) {
+				reject('wait element timed out');
+				return;
+			}
+			await sleep(1e3 * checkFrequencyInSecond);
+		}
+		resolve(void 0);
+		return;
+	});
 }
