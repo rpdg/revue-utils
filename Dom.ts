@@ -175,7 +175,6 @@ export function isVisible(selector: string | Element) {
 
 export interface IRaceShowResult {
 	element: Element;
-	selector: string;
 	index: number;
 }
 /**
@@ -197,7 +196,6 @@ export function raceShow(selectors: string[], timeoutInSecond: number = 30, chec
 				if (isVisible(selector)) {
 					resolve({
 						element: document.querySelector(selector)!,
-						selector,
 						index: i,
 					});
 					return;
@@ -221,8 +219,11 @@ export function raceShow(selectors: string[], timeoutInSecond: number = 30, chec
  */
 export function waitShow(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<Element> {
 	return new Promise(async (resolve, reject) => {
+		let v = isVisible(selector);
+		if (v){
+			resolve(document.querySelector(selector)!);
+		}
 		let p = false;
-		let v = false;
 		let t = 0;
 		while (!p || !v) {
 			v = isVisible(selector);
@@ -245,8 +246,11 @@ export function waitShow(selector: string, timeoutInSecond: number = 30, checkFr
 
 export function waitHide(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<void> {
 	return new Promise(async (resolve, reject) => {
+		let v = isVisible(selector);
+		if (!v){
+			resolve(void 0);
+		}
 		let p = true;
-		let v = true;
 		let t = 0;
 		while (p || v) {
 			v = isVisible(selector);
