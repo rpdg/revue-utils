@@ -1,5 +1,8 @@
 ## A typescript toy kit library for react.js and vue.js
 
+[![NPM Version](https://img.shields.io/npm/v/@rpdg/revue-utils.svg)](https://npmjs.org/package/@rpdg/revue-utils) [![NPM Downloads](http://img.shields.io/npm/dm/@rpdg/revue-utils.svg)](https://npmjs.org/package/@rpdg/revue-utils)
+
+
 This is a tool library written in TypeScript that mainly provides encapsulation of a series of commonly used methods, including graphic processing, WeChat functions, file handling, string processing, etc.
 
 ### install
