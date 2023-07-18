@@ -24,6 +24,24 @@ export function getRandomColor(): string {
 	return color;
 }
 
+export function stringToColor(str: string): string {
+	if (!str || str.length < 3) {
+		return '#000000';
+	}
+
+	let p = 3;
+	let l = ~~(str.length / p);
+	let arr: number[] = [];
+	for (let x = 0; x < p; x++) {
+		let codeSum = 0;
+		for (let i = 0; i < l; i++) {
+			codeSum += str.charCodeAt(i * x);
+		}
+		arr.push(codeSum % 256);
+	}
+	return `#${arr[0].toString(16)}${arr[1].toString(16)}${arr[2].toString(16)}`;
+}
+
 export async function copy(txt: string) {
 	await navigator.clipboard.writeText(txt);
 }
