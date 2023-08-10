@@ -3,7 +3,7 @@ import {
 	DebounceSettings,
 	once as onceFn,
 	throttle as throttleFn,
-	ThrottleSettings
+	ThrottleSettings,
 } from 'lodash';
 import JsonStorage from '../JsonStorage';
 
@@ -44,7 +44,7 @@ export function bind(target: any, key: string, descriptor: TypedPropertyDescript
 			definingProperty = false;
 			return boundFn;
 		},
-		set(value:(...params: any) => any) {
+		set(value: (...params: any) => any) {
 			fn = value;
 		},
 	};
@@ -63,7 +63,7 @@ export function debounce(milliseconds: number = 0, options?: DebounceSettings): 
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		const map = new WeakMap();
 		const originalMethod = descriptor.value;
-		descriptor.value = function (...params:any[]) {
+		descriptor.value = function (...params: any[]) {
 			let debounced = map.get(this);
 			if (!debounced) {
 				debounced = debounceFn(originalMethod, milliseconds, options).bind(this);
@@ -115,7 +115,7 @@ export function delay(milliseconds: number = 0): any {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		const originalMethod = descriptor.value;
 
-		descriptor.value = function (...args:any[]) {
+		descriptor.value = function (...args: any[]) {
 			setTimeout(() => {
 				originalMethod.apply(this, args);
 			}, milliseconds);
@@ -139,17 +139,17 @@ const sortFunc = (a: any, b: any) => {
 	* @param {
 		isDescending: boolean;
 		sortByPropertyType: string;
-	  } options 
+	  } options
 	* @returns script version
 	*/
 
 /**
- * sort - sort an array by a specific property in individual 
- * elements or non-object items 
+ * sort - sort an array by a specific property in individual
+ * elements or non-object items
  * (By default, it sorts by type === 'string' and isDescending === true)
- * 
+ *
  * class Test {
-  
+
   @sort('name', {
     isDescending: false,
     type: 'string'
@@ -242,7 +242,7 @@ export function deprecated(deprecationReason: string) {
  * Add log while value changes
  * @log
  * name:string;
- * 
+ *
  */
 export function log<C>(target: C, propertyKey: string, propertyDescriptor: PropertyDescriptor) {
 	let oldValue: any;
@@ -267,7 +267,7 @@ export enum PersistType {
 }
 /**
  * 持久化到locale storage
- * 
+ *
  *  @persist(AUTH_TOKEN)
 	token: string;
 
@@ -298,4 +298,18 @@ export function persist(storeKey: string, type: PersistType = 1): PropertyDecora
 export function seal(constructor: Function) {
 	Object.seal(constructor);
 	Object.seal(constructor.prototype);
+}
+
+/**
+ * Set the enumerability of a property.
+ * @private
+ * @function enumerable
+ * @param {boolean} isEnumerable Whether the property should be enumerable or not.
+ * @returns {propertyDecorator}
+ */
+export function enumerable(isEnumerable: boolean) {
+	return function (target, key, descriptor) {
+		descriptor.enumerable = isEnumerable;
+		return descriptor;
+	};
 }
