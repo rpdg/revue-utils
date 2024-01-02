@@ -15,6 +15,17 @@ export default {
 		let d = this.daySpan(dateFrom, dateTo);
 		return Math.ceil((d + dateFrom.getDay()) / 7);
 	},
+	generateDateRange: function (startDate: Date, endDate: Date): Date[] {
+		let dateRange: Date[] = [];
+		let currentDate = new Date(startDate);
+
+		while (currentDate <= endDate) {
+			dateRange.push(new Date(currentDate));
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+
+		return dateRange;
+	},
 	format: function (date: Date, formatPatten: string = 'yyyy-MM-dd'): string {
 		let o = {
 			'M+': date.getMonth() + 1, //month
@@ -45,7 +56,6 @@ export default {
 		return formatPatten;
 	},
 };
-
 
 export const Millisecond = 1;
 export const Second = 1e3;
