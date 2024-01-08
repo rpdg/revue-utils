@@ -165,3 +165,23 @@ export function downloadBlob(blob: Blob, filename: string): HTMLAnchorElement {
 	// in order to attach it to the DOM or use it in some other way
 	return a;
 }
+
+/**
+ * Retrieves the buffer of a file.
+ * @param filePath The path of the file.
+ * @returns A promise that resolves with the Uint8Array buffer.
+ */
+export function getBuffer(filePath: string): Promise<Uint8Array> {
+	return new Promise<Uint8Array>(function (resolve, reject) {
+		let xhr = new XMLHttpRequest();
+		xhr.open('GET', filePath);
+		xhr.responseType = 'arraybuffer';
+		xhr.onload = function () {
+			resolve(new Uint8Array(xhr.response));
+		};
+		xhr.onerror = function () {
+			reject(new Error('file is not loaded'));
+		};
+		xhr.send();
+	});
+}
