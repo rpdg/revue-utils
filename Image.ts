@@ -237,6 +237,38 @@ export const checkCanvasMime = (canvas: HTMLCanvasElement) => {
 	return acceptedMimes;
 };
 
+
+/**
+ * 去除PNG透明背景,变成白色不透明背景,同时保留原图非透明像素信息。
+ * @param srcData
+ * @returns
+ */
+export function makePngBgOpaqueWhite(srcData: ImageData): ImageData {
+	var width = srcData.width;
+	var height = srcData.height;
+	var image = new ImageData(width, height);
+	var imageData = image.data;
+
+	for (var i = 0; i < imageData.length; i += 4) {
+		imageData[i] = 255; // red
+		imageData[i + 1] = 255; // green
+		imageData[i + 2] = 255; // blue
+		imageData[i + 3] = 255; // alpha
+	}
+
+	for (var y = 0; y < height; y++) {
+		for (var x = 0; x < width; x++) {
+			var index = (y * width + x) * 4;
+			imageData[index] = srcData.data[index]; // red
+			imageData[index + 1] = srcData.data[index + 1]; // green
+			imageData[index + 2] = srcData.data[index + 2]; // blue
+			imageData[index + 3] = srcData.data[index + 3]; // alpha
+		}
+	}
+
+	return image;
+}
+
 export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
 	canvas.toBlob(
 		(blob) => {
