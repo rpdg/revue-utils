@@ -237,36 +237,236 @@ export const checkCanvasMime = (canvas: HTMLCanvasElement) => {
 	return acceptedMimes;
 };
 
-
 /**
- * 去除PNG透明背景,变成白色不透明背景,同时保留原图非透明像素信息。
+ * 去除PNG透明背景,叠加指定颜色（默认白色）,同时保留原图非透明像素信息。
  * @param srcData
  * @returns
  */
-export function makePngBgOpaqueWhite(srcData: ImageData): ImageData {
-	var width = srcData.width;
-	var height = srcData.height;
-	var image = new ImageData(width, height);
-	var imageData = image.data;
+export function applyBackgroundOverlay(
+	srcData: Uint8ClampedArray,
+	bgColor: { r: number; g: number; b: number } = { r: 255, g: 255, b: 255 }
+): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(srcData.length);
 
-	for (var i = 0; i < imageData.length; i += 4) {
-		imageData[i] = 255; // red
-		imageData[i + 1] = 255; // green
-		imageData[i + 2] = 255; // blue
-		imageData[i + 3] = 255; // alpha
-	}
+	for (let i = 0; i < srcData.length; i += 4) {
+		const alpha = srcData[i + 3];
 
-	for (var y = 0; y < height; y++) {
-		for (var x = 0; x < width; x++) {
-			var index = (y * width + x) * 4;
-			imageData[index] = srcData.data[index]; // red
-			imageData[index + 1] = srcData.data[index + 1]; // green
-			imageData[index + 2] = srcData.data[index + 2]; // blue
-			imageData[index + 3] = srcData.data[index + 3]; // alpha
+		if (alpha < 255) {
+			// 对半透明像素进行颜色混合
+			const alphaFactor = alpha / 255;
+			outputData[i] = bgColor.r + alphaFactor * (outputData[i] - bgColor.r); // 混合红色通道
+			outputData[i + 1] = bgColor.g + alphaFactor * (outputData[i + 1] - bgColor.g); // 混合绿色通道
+			outputData[i + 2] = bgColor.b + alphaFactor * (outputData[i + 2] - bgColor.b); // 混合蓝色通道
+			outputData[i + 3] = 255;
+		} else {
+			outputData[i] = srcData[i]; // 保留原有的颜色信息
+			outputData[i + 1] = srcData[i + 1]; // 保留原有的颜色信息
+			outputData[i + 2] = srcData[i + 2]; // 保留原有的颜色信息
+			outputData[i + 3] = srcData[i + 3]; // 保留原有的 alpha 通道值
 		}
 	}
 
-	return image;
+	return outputData;
+}
+
+/**
+ * 图像反色
+ * @param data
+ * @returns
+ */
+export function invert(data: Uint8ClampedArray): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+
+	for (let i = 0; i < data.length; i += 4) {
+		outputData[i] = 255 - data[i]; // 反色处理，即将原色取补
+		outputData[i + 1] = 255 - data[i + 1];
+		outputData[i + 2] = 255 - data[i + 2];
+		outputData[i + 3] = data[i + 3]; // 保持 alpha 通道不变
+	}
+
+	return outputData;
+}
+
+/**
+ * 转换为灰度
+ * @param data
+ * @returns
+ */
+export function grayScale(data: Uint8ClampedArray): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+	for (let i = 0; i < data.length; i += 4) {
+		const r = data[i];
+		const g = data[i + 1];
+		const b = data[i + 2];
+		// const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+		// const brightness = r * 0.34 + g * 0.5 + b * 0.16;
+		const brightness = (r + g + b) / 3;
+		outputData[i] = outputData[i + 1] = outputData[i + 2] = brightness;
+		outputData[i + 3] = data[i + 3]; // 保持 alpha 值不变
+	}
+
+	return outputData;
+}
+
+/**
+ * 转换为灰度, 加权平均的方式计算灰度值
+ * @param data
+ * @returns
+ */
+export function grayScale2(data: Uint8ClampedArray): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+	for (let i = 0; i < data.length; i += 4) {
+		const r = data[i];
+		const g = data[i + 1];
+		const b = data[i + 2];
+		// const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+		const brightness = r * 0.34 + g * 0.5 + b * 0.16;
+		// const brightness = (r + g + b) / 3;
+		outputData[i] = outputData[i + 1] = outputData[i + 2] = brightness;
+		outputData[i + 3] = data[i + 3]; // 保持 alpha 值不变
+	}
+
+	return outputData;
+}
+
+/**
+ * 自适应阈值二值化
+ * @param data
+ * @param threshold
+ * @returns
+ */
+export function threshold(data: Uint8ClampedArray, threshold: number = 160): Uint8ClampedArray {
+	const width = data.length / 4;
+	const height = 1;
+	const newPixData = new Uint8ClampedArray(width * height * 4);
+
+	for (let i = 0; i < width * height; i++) {
+		const r = data[i * 4];
+		const g = data[i * 4 + 1];
+		const b = data[i * 4 + 2];
+		const a = data[i * 4 + 3];
+
+		const gray = (r + g + b) / 3;
+
+		if (gray > threshold) {
+			newPixData[i * 4] = newPixData[i * 4 + 1] = newPixData[i * 4 + 2] = 255;
+			newPixData[i * 4 + 3] = a;
+		} else {
+			newPixData[i * 4] = newPixData[i * 4 + 1] = newPixData[i * 4 + 2] = 0;
+			newPixData[i * 4 + 3] = a;
+		}
+	}
+
+	return newPixData;
+}
+
+/**
+ * 自适应阈值二值化, 加权平均的方式计算灰度值
+ * @param data
+ * @param threshold
+ * @returns
+ */
+export function threshold2(data: Uint8ClampedArray, threshold: number = 160): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+	for (let i = 0; i < data.length; i += 4) {
+		let r = data[i];
+		let g = data[i + 1];
+		let b = data[i + 2];
+
+		// 加权平均的方式计算灰度值
+		let brightness = r * 0.34 + g * 0.5 + b * 0.16;
+		if (brightness > threshold) {
+			outputData[i] = outputData[i + 1] = outputData[i + 2] = 255;
+		} else {
+			outputData[i] = outputData[i + 1] = outputData[i + 2] = 0;
+		}
+		outputData[i + 3] = 255; // 设置alpha通道值为不透明
+	}
+
+	return outputData;
+}
+
+/**
+ * 膨胀操作
+ * @param data
+ * @param width
+ * @param height
+ * @returns
+ */
+export function dilate(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+
+	for (let i = 0; i < data.length; i += 4) {
+		if (data[i] === 0) {
+			for (let j = -1; j <= 1; j++) {
+				for (let k = -1; k <= 1; k++) {
+					let x = (i / 4) % width;
+					let y = Math.floor(i / 4 / width);
+					if (x + j >= 0 && x + j < width && y + k >= 0 && y + k < height) {
+						let index = 4 * (width * (y + k) + (x + j));
+						outputData[index] = 0;
+						outputData[index + 1] = 0;
+						outputData[index + 2] = 0;
+						outputData[index + 3] = 255;
+					}
+				}
+			}
+		} else {
+			outputData[i] = 255;
+			outputData[i + 1] = 255;
+			outputData[i + 2] = 255;
+			outputData[i + 3] = 255;
+		}
+	}
+
+	return outputData;
+}
+
+// 腐蚀操作
+export function erode(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+	let kernel = [
+		[0, 1, 0],
+		[1, 1, 1],
+		[0, 1, 0],
+	];
+
+	for (let i = 0; i < data.length; i += 4) {
+		let x = (i / 4) % width;
+		let y = Math.floor(i / 4 / width);
+
+		let flag = true;
+		if (data[i] === 255) {
+			for (let j = -1; j <= 1; j++) {
+				for (let k = -1; k <= 1; k++) {
+					if (x + j >= 0 && x + j < width && y + k >= 0 && y + k < height) {
+						let dataIndex = 4 * (width * (y + k) + (x + j));
+						if (kernel[k + 1][j + 1] === 1 && data[dataIndex] !== 255) {
+							flag = false;
+						}
+					}
+				}
+			}
+			if (flag) {
+				outputData[i] = 255;
+				outputData[i + 1] = 255;
+				outputData[i + 2] = 255;
+				outputData[i + 3] = 255;
+			} else {
+				outputData[i] = 0;
+				outputData[i + 1] = 0;
+				outputData[i + 2] = 0;
+				outputData[i + 3] = 255;
+			}
+		} else {
+			outputData[i] = 0;
+			outputData[i + 1] = 0;
+			outputData[i + 2] = 0;
+			outputData[i + 3] = 255;
+		}
+	}
+
+	return outputData;
 }
 
 export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
@@ -429,14 +629,13 @@ export function kmeans(canvas: HTMLCanvasElement, k: number): IRGBA {
 	return avgColor;
 }
 
-
 /**
  * 返回canvas中使用最多的颜色
  * @param canvas
  * @returns
  */
 export function getMostUsedColor(canvas: HTMLCanvasElement): IRGBA {
-	let colorCounts :any = {};
+	let colorCounts: any = {};
 	let maxCount = 0;
 	let mostFrequentColor: IRGBA = { r: 0, g: 0, b: 0, a: 0 };
 
