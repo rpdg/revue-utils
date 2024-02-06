@@ -10,7 +10,7 @@ export async function blobToBase64(blob: Blob) {
 }
 
 export function blobToFile(theBlob: Blob, fileName: string = 'new_image'): File {
-	const imgFile: File = new File([theBlob], 'new_image', { lastModified: Date.now(), type: theBlob.type });
+	const imgFile: File = new File([theBlob], fileName, { lastModified: Date.now(), type: theBlob.type });
 	return imgFile;
 }
 
