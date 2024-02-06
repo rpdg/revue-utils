@@ -391,61 +391,42 @@ export function threshold2(data: Uint8ClampedArray, threshold: number = 160): Ui
  * @param data
  * @param width
  * @param height
- * @param dilationFactor （表示膨胀的像素数量）
+ * @param radius （表示膨胀的像素数量）
  * @returns
  */
-export function dilate(data: Uint8ClampedArray, width: number, height: number, dilationFactor = 1): Uint8ClampedArray {
-	let outputData = new Uint8ClampedArray(data.length);
+export function dilate(data: Uint8ClampedArray, width: number, height: number, radius = 1): Uint8ClampedArray {
+	let dst = new Uint8ClampedArray(data.length);
+	const pix = new Uint32Array(dst.buffer);
 
-	for (let i = 0; i < data.length; i += 4) {
-		if (data[i] === 0) {
-			for (let j = -dilationFactor; j <= dilationFactor; j++) {
-				for (let k = -dilationFactor; k <= dilationFactor; k++) {
-					let x = (i / 4) % width;
-					let y = Math.floor(i / 4 / width);
-					if (x + j >= 0 && x + j < width && y + k >= 0 && y + k < height) {
-						let index = 4 * (width * (y + k) + (x + j));
-						outputData[index] = 0;
-						outputData[index + 1] = 0;
-						outputData[index + 2] = 0;
-						outputData[index + 3] = 255;
-					}
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			let color = pix[y * width + x];
+
+			for (let dy = -radius; dy <= radius; dy++) {
+				const yy = Math.max(0, Math.min(height - 1, y + dy));
+
+				for (let dx = -radius; dx <= radius; dx++) {
+					const xx = Math.max(0, Math.min(width - 1, x + dx));
+
+					pix[yy * width + xx] = color;
 				}
 			}
-		} else {
-			outputData[i] = 255;
-			outputData[i + 1] = 255;
-			outputData[i + 2] = 255;
-			outputData[i + 3] = 255;
 		}
 	}
 
-	return outputData;
+	return dst;
 }
 
-//
-// function createKernel(kernelSize: number) {
-// 	let kernel: number[][] = [];
-// 	for (let i = 0; i < kernelSize; i++) {
-// 		kernel[i] = [];
-// 		for (let j = 0; j < kernelSize; j++) {
-// 			kernel[i][j] = 0;
-// 		}
-// 	}
-// 	let centerX = Math.floor(kernelSize / 2);
-// 	let centerY = Math.floor(kernelSize / 2);
-// 	kernel[centerX][centerY] = 1;
-// 	return kernel;
-// }
 
 /**
  * 腐蚀操作
+ * @deprecated 请使用 erode()
  * @param data
  * @param width
  * @param height
  * @returns
  */
-export function erode(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+export function erode2(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
 	let outputData = new Uint8ClampedArray(data.length);
 	let kernel = [
 		[0, 1, 0],
@@ -488,8 +469,6 @@ export function erode(data: Uint8ClampedArray, width: number, height: number): U
 	return outputData;
 }
 
-
-
 /**
  * 腐蚀操作
  * @param data
@@ -507,7 +486,7 @@ export function erode(data: Uint8ClampedArray, width: number, height: number): U
 	// 以黑色为阈值进行腐蚀
 	erode(data, width, height, 1, 0);
  */
-export function erode2(
+export function erode(
 	data: Uint8ClampedArray,
 	width: number,
 	height: number,
@@ -540,7 +519,6 @@ export function erode2(
 
 	return dst;
 }
-
 
 export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
 	canvas.toBlob(
