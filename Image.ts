@@ -202,7 +202,8 @@ export async function checkExists(src: string): Promise<boolean> {
 		img.onload = () => {
 			resolve(true);
 		};
-		img.onerror = (error) => {
+		img.onerror = (error: any) => {
+			console.error(error);
 			reject(false);
 		};
 		img.src = src;
@@ -290,21 +291,21 @@ export function invert(data: Uint8ClampedArray): Uint8ClampedArray {
 /**
  * 转换为灰度
  * @param data
+ * @param contrast 取值范围为0到1，代表从完全黑到原始灰度
  * @returns
  */
-export function grayScale(data: Uint8ClampedArray): Uint8ClampedArray {
+function grayScale(data: Uint8ClampedArray, contrast: number = 1): Uint8ClampedArray {
 	let outputData = new Uint8ClampedArray(data.length);
 	for (let i = 0; i < data.length; i += 4) {
 		const r = data[i];
 		const g = data[i + 1];
 		const b = data[i + 2];
-		// const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-		// const brightness = r * 0.34 + g * 0.5 + b * 0.16;
-		const brightness = (r + g + b) / 3;
+		let brightness = (r + g + b) / 3;
+		// Adjust brightness based on contrast level
+		brightness = brightness * contrast + (1 - contrast) * 128;
 		outputData[i] = outputData[i + 1] = outputData[i + 2] = brightness;
 		outputData[i + 3] = data[i + 3]; // 保持 alpha 值不变
 	}
-
 	return outputData;
 }
 
@@ -394,59 +395,87 @@ export function threshold2(data: Uint8ClampedArray, threshold: number = 160): Ui
  * @param radius （表示膨胀的像素数量）
  * @returns
  */
-export function dilate(data: Uint8ClampedArray, width: number, height: number, radius = 1): Uint8ClampedArray {
-	let dst = new Uint8ClampedArray(data.length);
-	const pix = new Uint32Array(dst.buffer);
-
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			let color = pix[y * width + x];
-
-			for (let dy = -radius; dy <= radius; dy++) {
-				const yy = Math.max(0, Math.min(height - 1, y + dy));
-
-				for (let dx = -radius; dx <= radius; dx++) {
-					const xx = Math.max(0, Math.min(width - 1, x + dx));
-
-					pix[yy * width + xx] = color;
+export function dilate(data: Uint8ClampedArray, width: number, height: number, radius: number = 1): Uint8ClampedArray {
+	let outputData = new Uint8ClampedArray(data.length);
+	for (let i = 0; i < data.length; i += 4) {
+		if (data[i] === 0) {
+			for (let j = -radius; j <= radius; j++) {
+				// 替换原来的-1和1
+				for (let k = -radius; k <= radius; k++) {
+					// 替换原来的-1和1
+					let x = (i / 4) % width;
+					let y = Math.floor(i / 4 / width);
+					if (x + j >= 0 && x + j < width && y + k >= 0 && y + k < height) {
+						let index = 4 * (width * (y + k) + (x + j));
+						outputData[index] = 0;
+						outputData[index + 1] = 0;
+						outputData[index + 2] = 0;
+						outputData[index + 3] = 255;
+					}
 				}
 			}
+		} else {
+			outputData[i] = 255;
+			outputData[i + 1] = 255;
+			outputData[i + 2] = 255;
+			outputData[i + 3] = 255;
 		}
 	}
-
-	return dst;
+	return outputData;
 }
+
 
 
 /**
  * 腐蚀操作
- * @deprecated 请使用 erode()
+ * 如果该区域中非白色（不是255）像素的数量超过了intensity值，则当前像素会被标记为黑色（蚀刻效果）。
+ * 因此，intensity越高，蚀刻就越少，因为只有当周围非白色像素的数量足够多时，当前像素才会被蚀刻。
  * @param data
  * @param width
  * @param height
+ * @param kernel 蚀核二维数组
+ * @param intensity 阈值，用于确定一个像素是否应该被转换为背景色, 如果你希望蚀刻效果较轻，可以选择较小的intensity值；反之，如果希望蚀刻效果更明显，可以选择较大的intensity值。
  * @returns
+ * @usage
+ *
+ * let kernel = [
+			[0, 1, 0],
+			[1, 1, 1],
+			[0, 1, 0],
+		];
+
+	let intensity = 2; // 根据腐蚀效果调整这个值
+
+	erode(data, width, height, kernel, intensity);
  */
-export function erode2(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+export function erode(
+	data: Uint8ClampedArray,
+	width: number,
+	height: number,
+	kernel: number[][],
+	intensity: number
+): Uint8ClampedArray {
 	let outputData = new Uint8ClampedArray(data.length);
-	let kernel = [
-		[0, 1, 0],
-		[1, 1, 1],
-		[0, 1, 0],
-	];
 	for (let i = 0; i < data.length; i += 4) {
 		let x = (i / 4) % width;
 		let y = Math.floor(i / 4 / width);
 		let flag = true;
 		if (data[i] === 255) {
+			let count = 0;
 			for (let j = -1; j <= 1; j++) {
 				for (let k = -1; k <= 1; k++) {
 					if (x + j >= 0 && x + j < width && y + k >= 0 && y + k < height) {
 						let dataIndex = 4 * (width * (y + k) + (x + j));
+						// 当kernel对应的值为1，并且该数据不是白色时，递增计数器
 						if (kernel[k + 1][j + 1] === 1 && data[dataIndex] !== 255) {
-							flag = false;
+							count++;
 						}
 					}
 				}
+			}
+			// 如果非白色像素点的数量高于强度值，标记为false
+			if (count > intensity) {
+				flag = false;
 			}
 			if (flag) {
 				outputData[i] = 255;
@@ -467,57 +496,6 @@ export function erode2(data: Uint8ClampedArray, width: number, height: number): 
 		}
 	}
 	return outputData;
-}
-
-/**
- * 腐蚀操作
- * @param data
- * @param width
- * @param height
- * @param radius 腐蚀核的大小
- * @param color 腐蚀的颜色阈值
- * @returns
- * @usage
- *
- *
- 	// 以白色为阈值进行腐蚀
-	erode(data, width, height, 1, 255);
-
-	// 以黑色为阈值进行腐蚀
-	erode(data, width, height, 1, 0);
- */
-export function erode(
-	data: Uint8ClampedArray,
-	width: number,
-	height: number,
-	radius = 1,
-	color = 255
-): Uint8ClampedArray {
-	const dst = new Uint8ClampedArray(data.length);
-
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			let min = color;
-
-			for (let dy = -radius; dy <= radius; dy++) {
-				const yy = Math.max(0, Math.min(height - 1, y + dy));
-				for (let dx = -radius; dx <= radius; dx++) {
-					const xx = Math.max(0, Math.min(width - 1, x + dx));
-					const idx = yy * width + xx;
-
-					if (data[idx] !== color) {
-						min = 0;
-						break;
-					}
-				}
-				if (min === 0) break;
-			}
-
-			dst[y * width + x] = min;
-		}
-	}
-
-	return dst;
 }
 
 export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
