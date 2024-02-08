@@ -294,7 +294,7 @@ export function invert(data: Uint8ClampedArray): Uint8ClampedArray {
  * @param contrast 取值范围为0到1，代表从完全黑到原始灰度
  * @returns
  */
-function grayScale(data: Uint8ClampedArray, contrast: number = 1): Uint8ClampedArray {
+export function grayScale(data: Uint8ClampedArray, contrast: number = 1): Uint8ClampedArray {
 	let outputData = new Uint8ClampedArray(data.length);
 	for (let i = 0; i < data.length; i += 4) {
 		const r = data[i];
