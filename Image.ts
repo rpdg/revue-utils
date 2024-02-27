@@ -424,8 +424,6 @@ export function dilate(data: Uint8ClampedArray, width: number, height: number, r
 	return outputData;
 }
 
-
-
 /**
  * 腐蚀操作
  * 如果该区域中非白色（不是255）像素的数量超过了intensity值，则当前像素会被标记为黑色（蚀刻效果）。
@@ -508,6 +506,35 @@ export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, 
 		quality
 	);
 };
+
+export function getImageData(img: HTMLImageElement, scaledSize?: number): Uint8ClampedArray {
+	let w = img.naturalWidth,
+		h = img.naturalHeight;
+	if (scaledSize) {
+		if (w > h) {
+			h = scaledSize;
+			w = Math.round(img.naturalWidth * (h / img.naturalHeight));
+		} else {
+			w = scaledSize;
+			h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+		}
+	}
+	const canvas = new OffscreenCanvas(w, h);
+	const ctx = canvas.getContext('2d')!;
+	ctx.drawImage(img, 0, 0, w, h);
+	const imgData = ctx.getImageData(0, 0, w, h);
+	return imgData.data;
+}
+
+export function drawImageData(data: Uint8ClampedArray, w: number, h: number): HTMLCanvasElement {
+	const canvas = document.createElement('canvas');
+	canvas.height = h;
+	canvas.width = w;
+	document.body.appendChild(canvas);
+	const ctx = canvas.getContext('2d')!;
+	ctx.putImageData(new ImageData(data, w, h), 0, 0);
+	return canvas;
+}
 
 export const BlankGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 

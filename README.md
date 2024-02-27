@@ -101,7 +101,7 @@ async function init() {
     import { imgCompress } from '@rpdg/revue-utils/Image';
     await imgCompress(srcBase64, 1280, 0.9); //
     ```
-    
+
 3. checkImageSize
 
     ```typescript
@@ -115,14 +115,14 @@ async function init() {
     import { fileToBase64 } from '@rpdg/revue-utils/Image';
     await fileToBase64(imgFile);
     ```
-    
+
 5. canvasToImage
 
     ```typescript
     import { canvasToImage } from '@rpdg/revue-utils/Image';
     canvasToImage(canvasElem , imgElem);    
     ```
-    
+
 6. downloadImage
 
     ```typescript
@@ -130,7 +130,38 @@ async function init() {
     await downloadImage(imgElem , 'img1.jpg');
     ```
 
+7. getImageData
+    ```ts
+    import { getImageData } from '@rpdg/revue-utils/Image';
+    let img = document.getElementById('demoImg');
+    let data = getImageData(img, 64);
+    ```
+
+8. threshold
+    ```ts
+    import {threshold, drawImageData} from '@rpdg/revue-utils/Image';
+    const scaledSize = 64;
+    let img = document.getElementById('demoImg');
+    let data = getImageData(img, scaledSize);
+    data = threshold(data, 180);
     
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if (w > h) {
+    	h = scaledSize;
+    	w = Math.round(img.naturalWidth * (h / img.naturalHeight));
+    } else {
+    	w = scaledSize;
+    	h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+    }
+    
+    drawImageData(data, w, h);
+    ```
+
+    
+
+9. 
+
+
 
 ### File
 
