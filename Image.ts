@@ -543,25 +543,36 @@ export const BlankGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAA
  * @param imageUrl
  * @returns
  */
-export function drawImageOnCanvas(imageUrl: string): Promise<HTMLCanvasElement> {
+export function drawImageOnCanvas(imageUrl: string, w: number, h: number): Promise<HTMLCanvasElement> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		img.src = imageUrl;
 		img.crossOrigin = 'anonymous';
 		img.onload = function () {
 			const canvas = document.createElement('canvas');
-			canvas.width = img.width;
-			canvas.height = img.height;
-
+			canvas.width = w || img.width;
+			canvas.height = h || img.height;
 			const ctx = canvas.getContext('2d')!;
 			ctx.drawImage(img, 0, 0);
-
 			resolve(canvas);
 		};
 		img.onerror = function (error) {
 			reject(error);
 		};
 	});
+}
+
+/**
+ * 传入SVG元素，并返回该图片绘制的 canvas
+ * @param svgElement
+ * @returns
+ */
+export async function drawSvgOnCanvas(svgElement: SVGElement): Promise<HTMLCanvasElement> {
+	let serializer = new XMLSerializer();
+	let svgString = serializer.serializeToString(svgElement);
+	let encodedData = window.btoa(unescape(encodeURIComponent(svgString)));
+	let dataUrl = 'data:image/svg+xml;base64,' + encodedData;
+	return await drawImageOnCanvas(dataUrl, svgElement.clientWidth, svgElement.clientHeight);
 }
 
 export type IRGBA = {
