@@ -75,16 +75,22 @@ export function sleep<T>(t: number, v?: T): Promise<T> {
 	});
 }
 
-
-export function makeFakeDate() {
+/**
+ * makeFakeDate(2000,0,1)
+ * console.log(new Date());            //  2000-01-01
+ * console.log(new Date(2023, 5, 18)); //  2023-06-18
+ * console.log(Date());                //  current date time
+ */
+export function makeFakeDate(...fakeArgs) {
 	const OriginalDate = Date;
 
 	const DateProxy = new Proxy(OriginalDate, {
 		construct(target, args) {
 			if (args.length === 0) {
 				// fake date
-				// 当没有参数时，返回 2024 年的日期
-				return new target(2024, 0, 1);
+				// 当没有参数时，返回 fake date
+				// @ts-ignore
+				return new target(...fakeArgs);
 			} else {
 				// 有参数时，正常调用原始 Date 构造函数
 				// @ts-ignore
