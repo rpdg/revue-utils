@@ -74,3 +74,28 @@ export function sleep<T>(t: number, v?: T): Promise<T> {
 		setTimeout(resolve.bind(null, v as any), t);
 	});
 }
+
+
+export function makeFakeDate() {
+	const OriginalDate = Date;
+
+	const DateProxy = new Proxy(OriginalDate, {
+		construct(target, args) {
+			if (args.length === 0) {
+				// fake date
+				// 当没有参数时，返回 2024 年的日期
+				return new target(2024, 0, 1);
+			} else {
+				// 有参数时，正常调用原始 Date 构造函数
+				// @ts-ignore
+				return new target(...args);
+			}
+		},
+		apply(target, thisArg, args) {
+			// 如果 Date 作为普通函数调用，则返回当前时间字符串
+			return target.apply(thisArg, args);
+		},
+	});
+
+	window.Date = DateProxy;
+}
