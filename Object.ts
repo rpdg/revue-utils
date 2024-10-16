@@ -6,7 +6,7 @@
 export function sortKeys<T = any>(unordered: any): T {
 	const ordered = Object.keys(unordered)
 		.sort()
-		.reduce((obj :any, key:string) => {
+		.reduce((obj: any, key: string) => {
 			obj[key] = unordered[key];
 			return obj;
 		}, {});
@@ -72,41 +72,6 @@ export function clone<T = any>(item: T): T {
 	}
 
 	return result;
-}
-
-/**
- * 防抖
- * @param handle
- * @param delay
- * @returns
- */
-export function debounce(handler: (args: any) => any, delay: number) {
-	let timer: any;
-	return function (this: Function) {
-		let _self = this,
-			_args = arguments;
-		clearTimeout(timer);
-		timer = setTimeout(function () {
-			handler.call(_self, _args);
-		}, delay);
-	};
-}
-
-/**
- * 节流
- * @param handler
- * @param delay
- * @returns
- */
-export function throttle(handler: (args: any) => any, delay: number) {
-	let lastTime = 0;
-	return function (this: Function) {
-		let nowTime = new Date().getTime();
-		if (nowTime - lastTime > delay) {
-			handler.call(this, arguments);
-			lastTime = nowTime;
-		}
-	};
 }
 
 /**
