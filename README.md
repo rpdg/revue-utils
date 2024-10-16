@@ -130,14 +130,20 @@ async function init() {
     await downloadImage(imgElem , 'img1.jpg');
     ```
 
-7. getImageData
+7. **getImageData**
+
+    Retrieves the pixel data from an HTMLImageElement, optionally scaling the image to a specified size.
+
+    It creates an OffscreenCanvas, draws the image onto it, and then extracts the image data as a Uint8ClampedArray.
+
     ```ts
     import { getImageData } from '@rpdg/revue-utils/Image';
     let img = document.getElementById('demoImg');
     let data = getImageData(img, 64);
     ```
 
-8. threshold
+8. **threshold**
+
     ```ts
     import {threshold, drawImageData} from '@rpdg/revue-utils/Image';
     const scaledSize = 64;
@@ -159,7 +165,43 @@ async function init() {
 
     
 
-9. 
+9. **drawSvgOnCanvas**
+
+    ```typescript
+    // Create an SVG element
+    const svgNS = "http://www.w3.org/2000/svg"; // Namespace for SVG
+    const svgElement = document.createElementNS(svgNS, "svg");
+    svgElement.setAttribute("width", "200");
+    svgElement.setAttribute("height", "200");
+    
+    // Create a circle element
+    const circle = document.createElementNS(svgNS, "circle");
+    circle.setAttribute("cx", "100");
+    circle.setAttribute("cy", "100");
+    circle.setAttribute("r", "80");
+    circle.setAttribute("fill", "blue");
+    
+    // Append the circle to the SVG element
+    svgElement.appendChild(circle);
+    
+    // Append the SVG to the document for reference
+    document.getElementById('svg-container').appendChild(svgElement);
+    
+    // Call the drawSvgOnCanvas function
+    const canvas = await drawSvgOnCanvas(svgElement);
+    
+    // Optionally, append the canvas to the document body
+    document.body.appendChild(canvas);
+    ```
+
+10. **drawImageOnCanvas**
+
+    ```typescript
+    const imageUrl = 'http://example.com/nonexistent.jpg';
+    const canvas = await drawImageOnCanvas(imageUrl);
+    ```
+
+    
 
 
 

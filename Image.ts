@@ -507,6 +507,13 @@ export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, 
 	);
 };
 
+/**
+ * getImageData retrieves the pixel data from an HTMLImageElement, optionally scaling the image to a specified size.
+ * It creates an OffscreenCanvas, draws the image onto it, and then extracts the image data as a Uint8ClampedArray.
+ * @param img
+ * @param scaledSize
+ * @returns
+ */
 export function getImageData(img: HTMLImageElement, scaledSize?: number): Uint8ClampedArray {
 	let w = img.naturalWidth,
 		h = img.naturalHeight;
@@ -526,6 +533,10 @@ export function getImageData(img: HTMLImageElement, scaledSize?: number): Uint8C
 	return imgData.data;
 }
 
+/**
+ * drawImageData creates a canvas element, sets its dimensions, and draws image data onto it using a Uint8ClampedArray.
+ * The canvas is then appended to the document body and returned for further use.
+ */
 export function drawImageData(data: Uint8ClampedArray, w: number, h: number): HTMLCanvasElement {
 	const canvas = document.createElement('canvas');
 	canvas.height = h;
@@ -539,7 +550,9 @@ export function drawImageData(data: Uint8ClampedArray, w: number, h: number): HT
 export const BlankGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 /**
- * 接受一个图片的 URL 并返回该图片绘制的 canvas
+ * drawImageOnCanvas loads an image from a given URL and draws it onto a canvas of specified width and height.
+// It returns a Promise that resolves with the created HTMLCanvasElement once the image is successfully loaded,
+// or rejects with an error if the image fails to load.
  * @param imageUrl
  * @returns
  */
@@ -550,8 +563,8 @@ export function drawImageOnCanvas(imageUrl: string, w: number, h: number): Promi
 		img.crossOrigin = 'anonymous';
 		img.onload = function () {
 			const canvas = document.createElement('canvas');
-			canvas.width = w || img.width;
-			canvas.height = h || img.height;
+			canvas.width = w || img.width || img.naturalWidth;
+			canvas.height = h || img.height || img.naturalHeight;
 			const ctx = canvas.getContext('2d')!;
 			ctx.drawImage(img, 0, 0);
 			resolve(canvas);
@@ -563,7 +576,8 @@ export function drawImageOnCanvas(imageUrl: string, w: number, h: number): Promi
 }
 
 /**
- * 传入SVG元素，并返回该图片绘制的 canvas
+ * This function converts an SVG element into a base64-encoded data URL and draws it onto a canvas element.
+ * It takes an SVGElement as input and returns a Promise that resolves to an HTMLCanvasElement.
  * @param svgElement
  * @returns
  */
