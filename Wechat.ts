@@ -182,23 +182,27 @@ export const hideToolbar = () => {
 	});
 };
 
-export type IPlatform = 'iOS' | 'Android' | 'wechat' | 'unkown';
+export type IPlatform = 'iOS' | 'Android' | 'wechat' | 'Harmony' | 'welink' | 'dd' | 'unkown';
 
 /**
  * 判断在何种平台下
  *
  * (ps: 鸿蒙归于安卓)
- * @returns 'iOS' | 'Android' | 'wechat' | 'unkown'
+ * @returns 'iOS' | 'Android' | 'wechat' | 'Harmony' | 'dd' | 'welink' | 'unkown'
  */
 export function platform(): IPlatform {
 	//检查用户代理
 	const ua = navigator.userAgent.toLowerCase();
-	if (/iphone|ipad|ipod/.test(ua)) {
-		return 'iOS';
-	} else if (/android/.test(ua) || /harmonyos/.test(ua)) {
-		return 'Android';
-	} else if (/micromessenger/.test(ua)) {
+	if (/micromessenger/.test(ua)) {
 		return 'wechat';
+	} else if (/DingTalk/.test(ua)) {
+		return 'dd';
+	} else if (/welink/.test(ua)) {
+		return 'welink';
+	} else if (/iphone|ipad|ipod/.test(ua)) {
+		return 'iOS';
+	} else if (/android/.test(ua) || /HarmonyOS|HMOS/.test(ua)) {
+		return 'Android';
 	} else {
 		return 'unkown';
 	}
