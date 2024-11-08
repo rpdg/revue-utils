@@ -108,8 +108,6 @@ export class Channel<T> {
 	}
 }
 
-
-
 /**
  * select 函数模拟了 Go 中 select 的多路复用特性
  *  @example
