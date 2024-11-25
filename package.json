@@ -1,6 +1,6 @@
 {
 	"name": "@rpdg/revue-utils",
-	"version": "1.0.84",
+	"version": "1.0.85",
 	"description": "A typescript library for react and vue",
 	"bugs": "https://github.com/rpdg/revue-utils/issues",
 	"homepage": "https://github.com/rpdg/revue-utils",
