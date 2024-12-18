@@ -117,3 +117,12 @@ export function getMonthBounds(date: Date): [Date, Date] {
 
 	return [firstDay, lastDay];
 }
+
+/**
+ * 获取当前日期月的完整日期列表
+ * @returns
+ */
+export function getMonthDates(date: Date): Date[] {
+	const [firstDay, lastDay] = getMonthBounds(date);
+	return DateTime.generateDateRange(firstDay, lastDay);
+}
