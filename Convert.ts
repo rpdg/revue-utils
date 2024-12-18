@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 export default {
-
 	/**
 	 * 某key-value对讲某个属性转成数组
 	 * @param arr
@@ -49,27 +48,31 @@ export default {
 		}
 		return obj;
 	},
-	stringToDate: function (str: string, format: string = 'yyyy-MM-dd HH:mm:ss') {
+	stringToDate: function (str: string, format: string = 'yyyy-MM-dd HH:mm:ss'): Date {
 		//let format = formater || 'yyyy-MM-dd HH:mm:ss'; // default format
-		let parts = str.match(/(\d+)/g),
-			i = 0,
-			fmt = {};
+		const parts = str.match(/(\d+)/g);
+		if (!parts) {
+			throw new Error('Invalid date string');
+		}
+		const fmt: Record<string, number> = {};
 		// extract date-part indexes from the format
-		format.replace(/(yyyy|dd|MM|HH|hh|mm|ss)/g, function (part: string) {
-			fmt[part] = i++;
+		format.replace(/(yyyy|dd|MM|HH|hh|mm|ss)/g, function (part: string, _index: number) {
+			fmt[part] = _index;
 			return part;
 		});
 		//
-		if (!fmt['HH'] && fmt['hh']) fmt['HH'] = fmt['hh'];
+		if (!fmt['HH'] && fmt['hh']) {
+			fmt['HH'] = fmt['hh'];
+		}
 
-		return new Date(
-			~~parts[fmt['yyyy']] || 0,
-			~~(parts[fmt['MM']] || 1) - 1,
-			~~parts[fmt['dd']] || 0,
-			~~parts[fmt['HH']] || 0,
-			~~parts[fmt['mm']] || 0,
-			~~parts[fmt['ss']] || 0
-		);
+		const year = fmt['yyyy'] !== undefined && parts[fmt['yyyy']] !== undefined ? ~~parts[fmt['yyyy']] : 0;
+		const month = fmt['MM'] !== undefined && parts[fmt['MM']] !== undefined ? ~~parts[fmt['MM']] - 1 : 0;
+		const day = fmt['dd'] !== undefined && parts[fmt['dd']] !== undefined ? ~~parts[fmt['dd']] : 0;
+		const hour = fmt['HH'] !== undefined && parts[fmt['HH']] !== undefined ? ~~parts[fmt['HH']] : 0;
+		const minute = fmt['mm'] !== undefined && parts[fmt['mm']] !== undefined ? ~~parts[fmt['mm']] : 0;
+		const second = fmt['ss'] !== undefined && parts[fmt['ss']] !== undefined ? ~~parts[fmt['ss']] : 0;
+
+		return new Date(year, month, day, hour, minute, second);
 	},
 	jsonToDate: function (isoString: string) {
 		return new Date(Date.parse(isoString));

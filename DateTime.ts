@@ -1,4 +1,4 @@
-export default {
+const DateTime = {
 	addSeconds: function (d: Date, s: number) {
 		return new Date(d.getTime() + s * 1000);
 	},
@@ -57,6 +57,8 @@ export default {
 	},
 };
 
+export default DateTime;
+
 export const Millisecond = 1;
 export const Second = 1e3;
 export const Minute = 60e3;
@@ -104,4 +106,14 @@ export function makeFakeDate(...fakeArgs) {
 	});
 
 	window.Date = DateProxy;
+}
+
+/**
+// 得到指定日期的所在月的第一天和最后一天
+*/
+export function getMonthBounds(date: Date): [Date, Date] {
+	const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+	const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+	return [firstDay, lastDay];
 }
