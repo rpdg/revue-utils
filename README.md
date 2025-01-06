@@ -363,6 +363,82 @@ stopVibrate() //停止震动
 
 
 
+### Channel
+
+The Channel<T> class implements a functionality similar to chan[T] in Golang.
+
+```typescript
+
+async function producer(ch: Channel<number>) {
+  for (let i = 0; i < 5; i++) {
+    console.log(`Producing: ${i}`);
+    await ch.send(i);
+	console.log(`Produced: ${i}`);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate production interval
+  }
+  ch.close(); // Close the channel after production is complete
+}
+
+async function consumer(ch: Channel<number>) {
+  while (true) {
+    const item = await ch.receive();
+    if (item === undefined) {
+      console.log("Channel closed, stopping consumer.");
+      break;
+    }
+    console.log(`Consuming: ${item}`);
+	await new Promise(resolve => setTimeout(resolve, 500)); // Simulate consumption interval
+  }
+}
+
+// Set the channel capacity to 2
+const ch = new Channel<number>(2); 
+
+// Start the producer and consumer
+producer(ch);
+consumer(ch);
+```
+
+#### select
+
+The select function simulates the multiplexing feature of select in Golang.
+
+```typescript
+async function producer(ch1: Channel<number>, ch2: Channel<number>) {
+  for (let i = 0; i < 3; i++) {
+    console.log(`Producer producing: ${i}`);
+    await ch1.send(i);
+    await ch2.send(i);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  ch1.close();
+  ch2.close();
+}
+
+async function consumer(ch1: Channel<number>, ch2: Channel<number>) {
+  while (true) {
+    const result = await select([ch1, ch2]); // multiplexing
+
+    if (result.value === undefined) {
+      console.log("Channel closed, stopping consumer.");
+      break;
+    }
+
+    console.log(`Received from channel: ${result.value}`);
+  }
+}
+
+const ch1 = new Channel<number>(1);
+const ch2 = new Channel<number>(1);
+
+producer(ch1, 1);
+producer(ch2, 2);
+
+consumer(ch1, ch2);
+```
+
+
+
 
 
 ## Thanks
