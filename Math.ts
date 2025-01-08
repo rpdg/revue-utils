@@ -1,5 +1,5 @@
 ﻿/**
- * 返回在某区间的一个随机数
+ * 返回 min（包含）到 max（不包含）的随机数
  * @param min 最小值
  * @param max 最大值
  * @param decimals 小数点位数，默认返回整数
@@ -84,38 +84,179 @@ export function avg(arr: number[]): number {
 }
 
 /**
+ * 移除统计异常值
+ * 使用 IQR 方法移除异常值
+ */
+export function removeStatisticalOutliers(arr: number[]): number[] {
+	const sorted = [...arr].sort((a, b) => a - b);
+	const q1 = sorted[Math.floor(sorted.length * 0.25)];
+	const q3 = sorted[Math.floor(sorted.length * 0.75)];
+	const iqr = q3 - q1;
+	const lowerBound = q1 - 1.5 * iqr;
+	const upperBound = q3 + 1.5 * iqr;
+
+	return arr.filter((x) => x >= lowerBound && x <= upperBound);
+}
+
+/**
  * 标准差, http://baike.baidu.com/view/78339.htm
  * @param arr 数字数组
  * @param avg 平均数
  * @param fix 保留小数位
+ * @returns 标准差
+ * @throws {Error} 当输入数组为空或包含非数字值时
  */
 export function stdEVP(arr: number[], fix?: number): number {
-	let sum = 0;
-	let av = avg(arr);
-	let l = arr.length;
-	for (let i = 0; i < l; i++) {
-		let dev = arr[i] - av;
-		sum += dev * dev;
+	// 输入验证
+	if (!Array.isArray(arr) || arr.length === 0) {
+		throw new Error('Input must be a non-empty array');
 	}
-	let resultVal = Math.sqrt(sum / l);
-	return typeof fix === 'number' ? Number(resultVal.toFixed(fix)) : resultVal;
+
+	if (arr.some((n) => typeof n !== 'number' || isNaN(n))) {
+		throw new Error('Array must contain only valid numbers');
+	}
+
+	// 使用 reduce 计算平均值，避免多次遍历
+	const sum = arr.reduce((acc, val) => acc + val, 0);
+	const mean = sum / arr.length;
+
+	// 计算偏差平方和
+	const squaredDeviations = arr.reduce((acc, val) => {
+		const deviation = val - mean;
+		return acc + deviation * deviation;
+	}, 0);
+
+	// 计算标准差
+	const standardDeviation = Math.sqrt(squaredDeviations / arr.length);
+
+	// 处理精度，修复类型检查问题
+	if (typeof fix === 'number' && fix >= 0) {
+		return Number(standardDeviation.toFixed(fix));
+	}
+	return standardDeviation;
+}
+
+/**
+ * 统计计算选项接口
+ */
+export interface StatisticsOptions {
+	fix?: number; // 保留小数位数
+	population?: boolean; // 是否为总体标准差
+	removeOutliers?: boolean; // 是否移除异常值
+}
+
+/**
+ * 增强的标准差计算函数
+ */
+export function calculateStandardDeviation(arr: number[], options: StatisticsOptions = {}): number {
+	const { fix, population = false, removeOutliers = false } = options;
+
+	let data = [...arr];
+
+	// 移除异常值
+	if (removeOutliers) {
+		data = removeStatisticalOutliers(data);
+	}
+
+	// 计算必要的统计量
+	const { sum, sumSquares, length } = data.reduce(
+		(acc, val) => ({
+			sum: acc.sum + val,
+			sumSquares: acc.sumSquares + val * val,
+			length: acc.length + 1,
+		}),
+		{ sum: 0, sumSquares: 0, length: 0 }
+	);
+
+	// 计算标准差
+	// 使用计算公式：σ = √(E[X²] - (E[X])²)
+	const mean = sum / length;
+	const denominator = population ? length : length - 1;
+	const variance = (sumSquares - sum * mean) / denominator;
+	const standardDeviation = Math.sqrt(Math.max(0, variance));
+
+	if (typeof fix === 'number' && fix >= 0) {
+		return Number(standardDeviation.toFixed(fix));
+	}
+	return standardDeviation;
 }
 
 /**
  * 中位数,  http://baike.baidu.com/view/170892.htm
  * @param array 数字数组
- * @param d 保留小数位
+ * @param precision - 结果保留的小数位数（可选）
+ * @returns 中位数
+ * @throws {Error} 当输入数组为空或包含非数字值时
  */
-export function median(array: number[], d?: number): number {
-	let l = array.length,
-		m = Math.ceil(div(l, 2)) - 1;
-	if (l % 2) {
-		return array[m];
-	} else {
-		let m1 = Math.floor(l * 0.5),
-			a = array[m1] + array[m];
-		return div(a, 2, d);
+export function median(array: number[], precision?: number): number {
+	// 输入验证
+	if (!Array.isArray(array) || array.length === 0) {
+		throw new Error('Input must be a non-empty array');
 	}
+
+	if (array.some((n) => typeof n !== 'number' || isNaN(n))) {
+		throw new Error('Array must contain only valid numbers');
+	}
+
+	const length = array.length;
+	const middleIndex = Math.floor(length / 2);
+
+	// 如果数组长度为奇数
+	if (length % 2 === 1) {
+		return array[middleIndex];
+	}
+
+	// 如果数组长度为偶数，计算中间两个数的平均值
+	const middleValue = (array[middleIndex - 1] + array[middleIndex]) / 2;
+
+	// 处理精度
+	if (typeof precision === 'number' && precision >= 0) {
+		return Number(middleValue.toFixed(precision));
+	}
+	return middleValue;
+}
+
+export interface MedianOptions {
+	precision?: number; // 保留小数位数
+	sorted?: boolean; // 数组是否已排序
+	removeOutliers?: boolean; // 是否移除异常值
+}
+
+export function calculateMedian(array: number[], options: MedianOptions = {}): number {
+	const { precision, sorted = false, removeOutliers = false } = options;
+
+	// 输入验证
+	if (!Array.isArray(array) || array.length === 0) {
+		throw new Error('Input must be a non-empty array');
+	}
+
+	let workingArray = [...array];
+
+	// 移除异常值（如果需要）
+	if (removeOutliers) {
+		workingArray = removeStatisticalOutliers(workingArray);
+	}
+
+	// 排序（如果需要）
+	if (!sorted) {
+		workingArray.sort((a, b) => a - b);
+	}
+
+	const length = workingArray.length;
+	const middleIndex = Math.floor(length / 2);
+
+	let result: number;
+	if (length % 2 === 1) {
+		result = workingArray[middleIndex];
+	} else {
+		result = (workingArray[middleIndex - 1] + workingArray[middleIndex]) / 2;
+	}
+
+	// 处理精度
+	if (typeof precision === 'number' && precision >= 0) {
+		return Number(result.toFixed(precision));
+	}
+	return result;
 }
 
 /**
@@ -335,8 +476,79 @@ export function inRange(x: number, min: number, max: number): boolean {
 	return (x - min) * (x - max) <= 0;
 }
 
+/**
+ * 将数字四舍五入到指定小数位
+ */
+function roundNumber(num: number, decimals: number): number {
+	if (decimals === 0) {
+		return Math.round(num);
+	}
 
-export function format_number(num: number, decimals: number, dec_point = ',', thousands_sep = '') {
+	const factor = Math.pow(10, decimals);
+	const tempNumber = num * factor;
+
+	// 处理非常小的数字
+	if (Math.abs(tempNumber) < 1) {
+		return parseFloat(num.toFixed(decimals));
+	}
+
+	return Math.round(tempNumber) / factor;
+}
+
+/**
+ * 将数字分割为整数部分和小数部分
+ */
+function splitNumber(num: number, decimals: number): [string, string] {
+	// 对于非常小的数字，直接使用 toFixed
+	if (Math.abs(num) < 1e-6) {
+		const [intPart, decPart = ''] = num.toFixed(decimals).split('.');
+		return [intPart, decPart];
+	}
+
+	// 常规情况
+	const numStr = num.toFixed(decimals);
+	const [intPart, decPart = ''] = numStr.split('.');
+	return [intPart, decPart];
+}
+
+/**
+ * 添加千位分隔符
+ */
+function addThousandsSeparator(numStr: string, separator: string): string {
+	if (!separator) return numStr;
+	return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+}
+
+/**
+ * 补齐小数位数
+ */
+function padDecimals(decimalPart: string, precision: number): string {
+	if (precision === 0) return '';
+	if (decimalPart.length < precision) {
+		return decimalPart.padEnd(precision, '0');
+	}
+	return decimalPart;
+}
+
+/**
+ * 格式化数字为字符串
+ * @param num - 要格式化的数字
+ * @param decimals - 小数位数
+ * @param dec_point - 小数点符号
+ * @param thousands_sep - 千位分隔符
+ * @returns 格式化后的字符串
+ *
+ * @example
+ * format_number(1234.56, 2) // '1,234.56'
+ * format_number(1234.56, 2, ',', ' ') // '1 234,56'
+ * format_number(67.311, 2) // '67.31'
+ */
+export function format_number(
+	num: number | string,
+	decimals: number = 0,
+	dec_point = '.',
+	thousands_sep = ','
+): string {
 	//   example 1: number_format(1234.56);
 	//   returns 1: '1,235'
 	//   example 2: number_format(1234.56, 2, ',', ' ');
@@ -355,35 +567,49 @@ export function format_number(num: number, decimals: number, dec_point = ',', th
 	//   returns 8: '67.000,00000'
 	//   example 9: number_format(0.9, 0);
 	//   returns 9: '1'
-	//  example 10: number_format('1.20', 2);
-	//  returns 10: '1.20'
-	//  example 11: number_format('1.20', 4);
-	//  returns 11: '1.2000'
-	//  example 12: number_format('1.2000', 3);
-	//  returns 12: '1.200'
-	//  example 13: number_format('1 000,50', 2, '.', ' ');
-	//  returns 13: '100 050.00'
-	//  example 14: number_format(1e-8, 8, '.', '');
-	//  returns 14: '0.00000001'
+	//   example 10: number_format('1.20', 2);
+	//   returns 10: '1.20'
+	//   example 11: number_format('1.20', 4);
+	//   returns 11: '1.2000'
+	//   example 12: number_format('1.2000', 3);
+	//   returns 12: '1.200'
+	//   example 13: number_format('1 000,50', 2, '.', ' ');
+	//   returns 13: '100 050.00'
+	//   example 14: number_format(1e-8, 8, '.', '');
+	//   returns 14: '0.00000001'
 
-	let number = (num + '').replace(/[^0-9+\-Ee.]/g, '');
-	let n = !isFinite(+number) ? 0 : +number,
-		prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-		sep = typeof thousands_sep === 'undefined' ? ',' : thousands_sep,
-		dec = typeof dec_point === 'undefined' ? '.' : dec_point,
-		//s = '',
-		toFixedFix = function (n: number, prec: number) {
-			let k = Math.pow(10, prec);
-			return '' + (Math.round(n * k) / k).toFixed(prec);
-		};
-	// Fix forar IE parseFloat(0.55).toFixed(0) = 0;
-	let s: Array<any> = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
-	if (s[0].length > 3) {
-		s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+	// 设置 decimals 的默认值为 0
+	const prec = decimals === undefined ? 0 : Math.max(0, Math.floor(decimals));
+
+	// 验证并清理输入
+	const cleanNumber = typeof num === 'string' ? parseFloat(num.replace(/[^0-9.+-eE]/g, '')) : num;
+
+	// 处理非有效数字
+	if (!Number.isFinite(cleanNumber)) {
+		return '0';
 	}
-	if ((s[1] || '').length < prec) {
-		s[1] = s[1] || '';
-		s[1] += new Array(prec - s[1].length + 1).join('0');
+
+	// 使用 toFixed 进行初步格式化，但保留原始精度
+	let numStr = cleanNumber.toFixed(20);
+
+	// 对于科学计数法的数字，需要特殊处理
+	if (Math.abs(cleanNumber) < 1e-6 || Math.abs(cleanNumber) >= 1e21) {
+		numStr = cleanNumber.toFixed(20);
 	}
-	return s.join(dec);
+
+	// 将字符串转回数字，以确保正确的舍入
+	const parsedNum = parseFloat(numStr);
+
+	// 处理四舍五入和小数位数
+	const roundedNum = roundNumber(parsedNum, prec);
+	const [intPart, decPart] = splitNumber(roundedNum, prec);
+
+	// 添加千位分隔符
+	const formattedIntPart = addThousandsSeparator(intPart, thousands_sep);
+
+	// 处理小数部分
+	const formattedDecPart = padDecimals(decPart, prec);
+
+	// 组合结果
+	return formattedDecPart ? `${formattedIntPart}${dec_point}${formattedDecPart}` : formattedIntPart;
 }

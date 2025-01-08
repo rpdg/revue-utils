@@ -1,55 +1,234 @@
-import { sleep } from './DateTime';
+/**
+ * 将 HTML 字符串转换为 DOM 元素数组
+ *
+ * @param htmlStr - HTML 字符串
+ * @returns HTMLElement 数组
+ *
+ * @example
+ * ```typescript
+ * const elements = createFragment('<div>Hello</div><span>World</span>');
+ * elements.forEach(el => document.body.appendChild(el));
+ * ```
+ */
+export function createFragment(htmlStr: string): HTMLElement[] {
+	if (!htmlStr.trim()) {
+		return [];
+	}
 
-export const createFragment = function (htmlStr: string): HTMLElement[] {
-	let frag = document.createDocumentFragment();
-	let temp = document.createElement('div');
+	const temp = document.createElement('div');
 	temp.innerHTML = htmlStr;
-	while (temp.firstChild) {
-		frag.appendChild(temp.firstChild);
-	}
-	return [...frag.childNodes] as HTMLElement[];
-};
 
-/**
- * 找元素的第n级父元素
- * @param ele
- * @param n
- * @returns
- */
-export function parents(ele: Node | null, n: number) {
-	while (ele && n) {
-		ele = ele.parentElement ? ele.parentElement : ele.parentNode;
-		n--;
+	const elements: HTMLElement[] = new Array(temp.children.length);
+	for (let i = elements.length - 1; i >= 0; i--) {
+		elements[i] = temp.children[i] as HTMLElement;
 	}
-	return ele;
+	temp.innerHTML = '';
+
+	return elements;
 }
 
 /**
- * 获得滚动条的滚动距离
- * @returns
+ * 获取元素的第 n 层父节点
+ *
+ * @param element - 起始元素
+ * @param level - 向上查找的层级数
+ * @param selector - 可选的选择器匹配条件
+ * @returns 找到的父节点，如果未找到返回 null
+ *
+ * @example
+ * ```typescript
+ * // 获取第 2 层父节点
+ * const parent = parents(element, 2);
+ *
+ * // 获取最近的 div 父节点
+ * const divParent = parents(element, 'div');
+ *
+ * // 获取第 2 层 class 包含 'container' 的父节点
+ * const containerParent = parents(element, 2, '.container');
+ * ```
  */
-export function getScrollOffset(): { x: number; y: number } {
-	if (window.pageXOffset) {
-		return {
-			x: window.pageXOffset,
-			y: window.pageYOffset,
-		};
-	} else {
-		return {
-			x: document.body.scrollLeft + document.documentElement.scrollLeft,
-			y: document.body.scrollTop + document.documentElement.scrollTop,
-		};
+export function parents(
+	element: Node | null | undefined,
+	levelOrSelector?: number | string,
+	selector?: string
+): Element | null {
+	if (!element) return null;
+
+	// 处理选择器参数
+	let level = 1;
+	let matchSelector: string | undefined;
+
+	if (typeof levelOrSelector === 'string') {
+		matchSelector = levelOrSelector;
+		level = Infinity; // 无限向上查找直到找到匹配的元素
+	} else if (typeof levelOrSelector === 'number') {
+		level = levelOrSelector;
+		matchSelector = selector;
+	}
+
+	// 如果层级为 0，直接返回元素本身（如果是 Element）
+	if (level === 0) {
+		return element instanceof Element ? element : null;
+	}
+
+	// 查找父节点
+	let current: Node | null = element;
+	let currentLevel = level;
+
+	while (current && currentLevel > 0) {
+		current = current.parentElement || current.parentNode;
+
+		if (!current || current === document) {
+			return null;
+		}
+
+		// 如果有选择器，检查是否匹配
+		if (matchSelector && current instanceof Element) {
+			try {
+				if (current.matches(matchSelector)) {
+					return current;
+				}
+				// 如果指定了具体层级但未找到匹配，继续查找
+				if (typeof levelOrSelector === 'number') {
+					currentLevel--;
+				}
+				continue;
+			} catch (e) {
+				// 处理无效的选择器
+				console.warn('Invalid selector:', matchSelector);
+				return null;
+			}
+		}
+
+		currentLevel--;
+	}
+
+	return current instanceof Element ? current : null;
+}
+
+/**
+ * 获取所有符合条件的父节点
+ *
+ * @param element - 起始元素
+ * @param selector - 可选的选择器匹配条件
+ * @param until - 可选的终止节点或选择器
+ * @returns 父节点数组
+ */
+export function parentsUntil(element: Node | null | undefined, selector?: string, until?: Element | string): Element[] {
+	const result: Element[] = [];
+	if (!element) return result;
+
+	let current: Node | null = element;
+
+	while (current) {
+		current = current.parentElement || current.parentNode;
+
+		if (!current || current === document || current === until) {
+			break;
+		}
+
+		if (current instanceof Element) {
+			if (until && typeof until === 'string') {
+				if (current.matches(until)) break;
+			}
+
+			if (!selector || current.matches(selector)) {
+				result.push(current);
+			}
+		}
+	}
+
+	return result;
+}
+
+/**
+ * 获取最近的匹配选择器的父节点
+ *
+ * @param element - 起始元素
+ * @param selector - 选择器
+ * @returns 找到的父节点或 null
+ */
+export function closest(element: Node | null | undefined, selector: string): Element | null {
+	if (!element) return null;
+
+	// 如果元素本身支持 closest 方法，直接使用
+	if (element instanceof Element && element.closest) {
+		return element.closest(selector);
+	}
+
+	// 回退到手动查找
+	return parents(element, selector);
+}
+
+/**
+ * 标准化 CSS 属性名
+ */
+export function normalizeCSSProperty(property: string): string {
+	return property.replace(/([A-Z])/g, '-$1').toLowerCase();
+}
+
+/**
+ * CSS 属性类型
+ */
+export type CSSPropertyName = keyof CSSStyleDeclaration;
+/**
+ * 获取元素的计算样式值
+ * @param element - 目标元素
+ * @param property - CSS 属性名
+ * @param pseudoElement - 可选的伪元素
+ * @returns 计算后的样式值
+ *
+ * @example
+ * ```typescript
+ * // 获取单个样式
+ * const width = getStyle(element, 'width');
+ *
+ * // 获取伪元素样式
+ * const beforeContent = getStyle(element, 'content', '::before');
+ * ```
+ */
+export function getStyle(element: HTMLElement, property: CSSPropertyName, pseudoElement?: string): string {
+	// 参数验证
+	if (!element || !property) {
+		return '';
+	}
+
+	// 标准化属性名
+	const normalizedProperty = normalizeCSSProperty(String(property));
+
+	try {
+		// 获取样式
+		const value =
+			window.getComputedStyle(element, pseudoElement)?.[normalizedProperty] ||
+			(element as any).currentStyle?.[normalizedProperty] ||
+			'';
+		return value;
+	} catch (e) {
+		console.warn(`Error getting style "${String(property)}" for element:`, element, e);
+		return '';
 	}
 }
 
 /**
- * 获取元素的任意style属性
- * @param elem
- * @param prop
- * @returns
+ * 获取多个样式属性
+ * @example
+ * ```typescript
+ * // 获取多个样式
+ * const styles = getStyles(element, ['width', 'height']);
+ * ```
  */
-export function getStyle(elem: HTMLElement, prop: string) {
-	return window.getComputedStyle ? window.getComputedStyle(elem, null)[prop] : (elem as any).currentStyle[prop];
+export function getStyles(element: HTMLElement, properties: CSSPropertyName[]): Record<string, string> {
+	const result: Record<string, string> = {};
+
+	// 优化：一次性获取 computedStyle
+	const computedStyle = window.getComputedStyle(element, null);
+
+	for (const prop of properties) {
+		const normalizedProp = normalizeCSSProperty(String(prop));
+		result[normalizedProp] = computedStyle[normalizedProp];
+	}
+
+	return result;
 }
 
 /**
@@ -120,38 +299,55 @@ export function openUrl(url: string, id: any = 'poppedWin'): void {
  * wait until an element exists
  *
  * @example
- * const elm = await waitUntilExists('.some-class' , 0);
+ * const elm = await waitUntilExists('.my-class' , 10);
  *
  * or :
  *
- * waitUntilExists('.some-class').then((elm) => {
- *     console.log(elm.textContent);
- * });
+ * waitUntilExists('.my-class').then(elm => {
+ *     console.log('Element found:', element);
+ * }).catch(error => {
+        console.error('Error:', error.message);
+    });
  */
 export function waitUntilExists(selector: string, timeoutInSecond: number = 30): Promise<Element> {
 	return new Promise((resolve, reject) => {
-		if (document.querySelector(selector)) {
-			return resolve(document.querySelector(selector)!);
+		// 检查DOM是否已经准备好
+		if (typeof document === 'undefined') {
+			return reject(new Error('DOM is not available'));
 		}
 
-		let t: number;
-		if (timeoutInSecond > 0) {
-			t = setTimeout(function () {
-				observer.disconnect();
-				reject('wait element timed out');
-			}, 1e3 * timeoutInSecond);
+		// 首次检查
+		const element = document.querySelector(selector);
+		if (element) {
+			return resolve(element);
 		}
 
-		const observer = new MutationObserver(function () {
-			if (document.querySelector(selector) != null) {
-				observer.disconnect();
-				if (timeoutInSecond > 0) {
-					clearTimeout(t);
-				}
-				resolve(document.querySelector(selector)!);
+		let timeoutId: number | undefined;
+		const observer = new MutationObserver(() => {
+			const element = document.querySelector(selector);
+			if (element) {
+				cleanup();
+				resolve(element);
 			}
 		});
 
+		// 清理函数
+		const cleanup = () => {
+			observer.disconnect();
+			if (timeoutId !== undefined) {
+				clearTimeout(timeoutId);
+			}
+		};
+
+		// 设置超时
+		if (timeoutInSecond > 0) {
+			timeoutId = setTimeout(() => {
+				cleanup();
+				reject(new Error(`Element ${selector} not found after ${timeoutInSecond} seconds`));
+			}, timeoutInSecond * 1000);
+		}
+
+		// 开始观察
 		observer.observe(document.body, {
 			childList: true,
 			subtree: true,
@@ -159,15 +355,38 @@ export function waitUntilExists(selector: string, timeoutInSecond: number = 30):
 	});
 }
 
-export function isVisible(selector: string | Element) {
+/**
+ * Check if the element is visible.
+ * @param selector - CSS selector string or DOM element.
+ * @returns Is the element visible
+ */
+export function isVisible(selector: string | Element): boolean {
 	try {
 		let elem = typeof selector === 'string' ? document.querySelector(selector) : selector;
-		if (elem != null) {
-			let rect = elem.getBoundingClientRect();
-			return rect.height > 0 && rect.width > 0;
-		} else {
+
+		if (!elem) {
 			return false;
 		}
+
+		// 获取元素的样式
+		const style = window.getComputedStyle(elem);
+
+		// 检查基本的可见性属性
+		if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+			return false;
+		}
+
+		// 检查元素是否有实际尺寸
+		let rect = elem.getBoundingClientRect();
+		return rect.height > 0 && rect.width > 0;
+
+		// 检查元素是否在视口内
+		const isInViewport =
+			rect.top >= 0 &&
+			rect.left >= 0 &&
+			rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+			rect.right <= (window.innerWidth || document.documentElement.clientWidth);
+		return isInViewport;
 	} catch (e) {
 		return false;
 	}
@@ -176,8 +395,15 @@ export function isVisible(selector: string | Element) {
 export interface IRaceShowResult {
 	element: Element;
 	index: number;
+	selector: string;
 }
 /**
+ * Race to check the first visible element among multiple selectors
+ * @param selectors - Array of selectors to check
+ * @param timeoutInSecond - Timeout (seconds)
+ * @param checkFrequencyInSecond - Check frequency (seconds)
+ * @returns Promise<IRaceShowResult>
+ *
  * @example
  * try{
       let {element, selector, index} = await raceShow(['#pager a.next', '#loading'], 10);
@@ -186,25 +412,59 @@ export interface IRaceShowResult {
       console.error(e);
     }
  */
-export function raceShow(selectors: string[], timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<IRaceShowResult> {
+export function raceShow(
+	selectors: string[],
+	timeoutInSecond: number = 30,
+	checkFrequencyInSecond: number = 0.1
+): Promise<IRaceShowResult> {
 	return new Promise(async (resolve, reject) => {
-		let t = 0;
-		while (t < timeoutInSecond) {
-			t += checkFrequencyInSecond;
-			for (let i = 0, n = selectors.length; i < n; i++) {
-				let selector = selectors[i];
-				if (isVisible(selector)) {
+		// 参数验证
+		if (!Array.isArray(selectors) || selectors.length === 0) {
+			reject(new Error('Selectors array must not be empty'));
+			return;
+		}
+
+		if (timeoutInSecond <= 0 || checkFrequencyInSecond <= 0) {
+			reject(new Error('Time parameters must be positive'));
+			return;
+		}
+
+		let isResolved = false;
+		const startTime = Date.now();
+		const timeoutMs = timeoutInSecond * 1000;
+		const checkIntervalMs = checkFrequencyInSecond * 1000;
+
+		// 检查函数
+		const checkElements = () => {
+			if (isResolved) return;
+
+			const elapsedTime = Date.now() - startTime;
+			if (elapsedTime >= timeoutMs) {
+				reject(new Error(`Timeout after ${timeoutInSecond} seconds`));
+				return;
+			}
+
+			for (let i = 0; i < selectors.length; i++) {
+				const selector = selectors[i];
+				const element = document.querySelector(selector);
+
+				if (element && isVisible(element)) {
+					isResolved = true;
 					resolve({
-						element: document.querySelector(selector)!,
+						element,
 						index: i,
+						selector,
 					});
 					return;
 				}
 			}
-			await sleep(1e3 * checkFrequencyInSecond);
-		}
-		reject('wait element timed out');
-		return;
+
+			// 继续检查
+			setTimeout(checkElements, checkIntervalMs);
+		};
+
+		// 开始检查
+		checkElements();
 	});
 }
 
@@ -217,54 +477,128 @@ export function raceShow(selectors: string[], timeoutInSecond: number = 30, chec
         console.error(e);
 	}
  */
-export function waitShow(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<Element> {
+export function waitShow(
+	selector: string,
+	timeoutInSecond: number = 30,
+	checkFrequencyInSecond: number = 0.1
+): Promise<Element> {
 	return new Promise(async (resolve, reject) => {
-		let v = isVisible(selector);
-		if (v){
-			resolve(document.querySelector(selector)!);
+		// 参数验证
+		if (!selector) {
+			reject(new Error('Selector must not be empty'));
+			return;
 		}
-		let p = false;
-		let t = 0;
-		while (!p || !v) {
-			v = isVisible(selector);
-			console.log(t, v, p);
-			if (v && !p) {
-				debugger;
-				p = v;
-			}
-			t += checkFrequencyInSecond;
-			if (t > timeoutInSecond) {
-				reject('wait element timed out');
+
+		if (timeoutInSecond <= 0 || checkFrequencyInSecond <= 0) {
+			reject(new Error('Time parameters must be positive'));
+			return;
+		}
+
+		// 首次检查
+		const element = document.querySelector(selector);
+		if (element && isVisible(element)) {
+			resolve(element);
+			return;
+		}
+
+		let isResolved = false;
+		const startTime = Date.now();
+		const timeoutMs = timeoutInSecond * 1000;
+		const checkIntervalMs = checkFrequencyInSecond * 1000;
+		let wasVisible = false;
+
+		// 检查函数
+		const checkElement = () => {
+			if (isResolved) return;
+
+			const elapsedTime = Date.now() - startTime;
+			if (elapsedTime >= timeoutMs) {
+				reject(new Error(`Timeout waiting for element ${selector} to show after ${timeoutInSecond} seconds`));
 				return;
 			}
-			await sleep(1e3 * checkFrequencyInSecond);
-		}
-		resolve(document.querySelector(selector)!);
-		return;
+
+			const element = document.querySelector(selector);
+			const isCurrentlyVisible = element && isVisible(element);
+
+			if (isCurrentlyVisible) {
+				if (!wasVisible) {
+					wasVisible = true;
+				} else {
+					// 元素连续两次可见，确认其稳定显示
+					isResolved = true;
+					resolve(element);
+					return;
+				}
+			} else {
+				wasVisible = false;
+			}
+
+			setTimeout(checkElement, checkIntervalMs);
+		};
+
+		// 开始检查
+		checkElement();
 	});
 }
 
-export function waitHide(selector: string, timeoutInSecond: number = 30, checkFrequencyInSecond: number = 0.1): Promise<void> {
+export function waitHide(
+	selector: string,
+	timeoutInSecond: number = 30,
+	checkFrequencyInSecond: number = 0.1
+): Promise<void> {
 	return new Promise(async (resolve, reject) => {
-		let v = isVisible(selector);
-		if (!v){
-			resolve(void 0);
+		// 参数验证
+		if (!selector) {
+			reject(new Error('Selector must not be empty'));
+			return;
 		}
-		let p = true;
-		let t = 0;
-		while (p || v) {
-			v = isVisible(selector);
-			if (!v && p) {
-				p = v;
-			}
-			t += checkFrequencyInSecond;
-			if (t > timeoutInSecond) {
-				reject('wait element timed out');
+
+		if (timeoutInSecond <= 0 || checkFrequencyInSecond <= 0) {
+			reject(new Error('Time parameters must be positive'));
+			return;
+		}
+
+		// 首次检查
+		if (!isVisible(selector)) {
+			resolve();
+			return;
+		}
+
+		let isResolved = false;
+		const startTime = Date.now();
+		const timeoutMs = timeoutInSecond * 1000;
+		const checkIntervalMs = checkFrequencyInSecond * 1000;
+		let wasHidden = false;
+
+		// 检查函数
+		const checkElement = () => {
+			if (isResolved) return;
+
+			const elapsedTime = Date.now() - startTime;
+			if (elapsedTime >= timeoutMs) {
+				reject(new Error(`Timeout waiting for element ${selector} to hide after ${timeoutInSecond} seconds`));
 				return;
 			}
-			await sleep(1e3 * checkFrequencyInSecond);
-		}
-		resolve(void 0);
-		return;
+
+			const isCurrentlyVisible = isVisible(selector);
+
+			if (!isCurrentlyVisible) {
+				if (!wasHidden) {
+					wasHidden = true;
+				} else {
+					// 元素连续两次不可见，确认其稳定隐藏
+					isResolved = true;
+					resolve();
+					return;
+				}
+			} else {
+				wasHidden = false;
+			}
+
+			setTimeout(checkElement, checkIntervalMs);
+		};
+
+		// 开始检查
+		checkElement();
 	});
 }

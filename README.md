@@ -43,45 +43,166 @@ export default {
 };
 ```
 
-### wechat utils
 
-1. convert wechat local image ids to image files
 
-```javascript
-import {localIdsToFiles} from '@rpdg/revue-utils/Wechat';
-wx.chooseImage({
-    success: async function (res: any) {
-		let localIds = res.localIds as string[];
- 		let filePaires = await localIdsToFiles(localIds);
-	},
+### Array
+
+```typescript
+import { litterN, sortOnProp, shuffle} from '@rpdg/revue-utils/Array';
+
+litterN(50, 100); // [50, 51, 52, ... 99, 100];
+
+let arr = [
+	{ age: 5, name: 'Tom' },
+	{ age: 2, name: 'Jerry' },
+	{ age: 3, name: 'Whoever' },
+];
+sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, { age: 3, name: 'Whoever' }, {age:5 , name: 'Tom'}]
+
+shuffle(arr);
+```
+
+
+
+### Channel
+
+The Channel<T> class implements a functionality similar to chan[T] in Golang.
+
+```typescript
+async function producer(ch: Channel<number>) {
+  for (let i = 0; i < 5; i++) {
+    console.log(`Producing: ${i}`);
+    await ch.send(i);
+	console.log(`Produced: ${i}`);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate production interval
+  }
+  ch.close(); // Close the channel after production is complete
+}
+
+async function consumer(ch: Channel<number>) {
+  while (true) {
+    const item = await ch.receive();
+    if (item === undefined) {
+      console.log("Channel closed, stopping consumer.");
+      break;
+    }
+    console.log(`Consuming: ${item}`);
+	await new Promise(resolve => setTimeout(resolve, 500)); // Simulate consumption interval
+  }
+}
+
+// Set the channel capacity to 2
+const ch = new Channel<number>(2); 
+
+// Start the producer and consumer
+producer(ch);
+consumer(ch);
+```
+
+The select function simulates the multiplexing feature of select in Golang.
+
+```typescript
+async function producer(ch1: Channel<number>, ch2: Channel<number>) {
+  for (let i = 0; i < 3; i++) {
+    console.log(`Producer producing: ${i}`);
+    await ch1.send(i);
+    await ch2.send(i);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  ch1.close();
+  ch2.close();
+}
+
+async function consumer(ch1: Channel<number>, ch2: Channel<number>) {
+  while (true) {
+    const result = await select([ch1, ch2]); // multiplexing
+
+    if (result.value === undefined) {
+      console.log("Channel closed, stopping consumer.");
+      break;
+    }
+
+    console.log(`Received from channel: ${result.value}`);
+  }
+}
+
+const ch1 = new Channel<number>(1);
+const ch2 = new Channel<number>(1);
+
+producer(ch1, 1);
+producer(ch2, 2);
+
+consumer(ch1, ch2);
+```
+
+
+
+### DateTime
+
+```js
+import DateTime from '@rpdg/revue-utils/DateTime';
+DateTime.addDays(new Date(), 7); // add 7 days
+DateTime.format(new Date(), 'yyyy/MM/dd HH:mm'); // 2022/02/28 10:04
+```
+
+
+
+### DOM
+
+```typescript
+import {createFragment, download, getStyle, isVisible, loadScript, parents, waitUntilExists} from '@rpdg/revue-utils/Dom';
+
+createFragment(`<div>abc</div><p>def</p>`);
+
+download('document.txt' , ['some text', '\n', 'next text']);
+
+// Get computed style property of the element
+getStyle(document.body, 'font-size')
+
+// Find the nth-level parent element
+parents(document.getElementById("targetID"), 3);
+
+// Test whether an element is visible on the page
+isVisible(".css_selector");
+
+// wait until an element exists
+await waitUntilExists(".css_selector", 30);
+
+await waitShow('#myElement', 10, 0.2);
+await waitHide('#myElement', 10, 0.2);
+
+// Race to check the first visible element among multiple selectors
+const result = await raceShow(['#pager a.next', '#loading'], 20, 0.2);
+console.log('Found element:', {
+	element: result.element,
+	selector: result.selector,
+	index: result.index
 });
 ```
 
-2. initial wechat js sdk
 
-```javascript
-import { readyAsync } from '@rpdg/revue-utils/Wechat';
-async function init() {
-	await readyAsync(cfg);
-}
+
+### File
+
+```typescript
+import {getFileName, getFileExt, normalizeSuffix} from '@rpdg/revue-utils/File';
+let fileFullName = 'abcd.test.jpg';
+getFileName(fileFullName); // 'abcd.test'
+getFileExt(fileFullName); // 'JPG'
+normalizeSuffix('.Docx'); // 'DOCX'
 ```
 
-3. wechat share
 
-```javascript
-import { shareAsync } from '@rpdg/revue-utils/Wechat';
-async function init() {
-	await shareAsync(['timeline', 'appMessage'], options);
-}
+
+### Hardware
+
+```typescript
+import { startVibrate , startPeristentVibrate , stopVibrate } from '@rpdg/revue-utils/Hardware';
+startVibrate(1000)   // 振动一次
+startVibrate([1000, 200, 1000, 2000, 400])  //震动多次
+startPeristentVibrate(1000, 1500)  //持续震动
+stopVibrate() //停止震动
 ```
-
-4. wechat pay
-
-    ```js
-    import { payAsync } from '@rpdg/revue-utils/Wechat';
-    // ...
-    await payAsync(options);
-    ```
 
 
 
@@ -205,29 +326,6 @@ async function init() {
 
 
 
-### File
-
-```typescript
-import {getFileName, getFileExt, normalizeSuffix} from '@rpdg/revue-utils/File';
-let fileFullName = 'abcd.test.jpg';
-getFileName(fileFullName); // 'abcd.test'
-getFileExt(fileFullName); // 'JPG'
-normalizeSuffix('.Docx'); // 'DOCX'
-```
-
-
-
-### DOM
-
-```typescript
-import {createFragment, download, getStyle} from '@rpdg/revue-utils/Dom';
-createFragment(`<div>abc</div><p>def</p>`);
-download('file.txt' , ['some text', '\n', 'next text']);
-getStyle(document.body, 'font-size')
-```
-
-
-
 ### JsonStorage
 
 ```js
@@ -245,17 +343,6 @@ let book: Book = {
 JsonStorage.set('book', book);
 
 let book2 = JsonStorage.get < Book > 'book'; // typed Book object
-```
-
-
-
-### String
-
-```js
-import { padLeft, padRight } from '@rpdg/revue-utils/String';
-
-padLeft('A', 4); // '000A'
-padRight('A', 4); // 'A000'
 ```
 
 
@@ -295,31 +382,13 @@ Math2.toFixed(859.385, 2); // 859.39 <- round
 
 
 
-### DateTime
+### String
 
 ```js
-import DateTime from '@rpdg/revue-utils/DateTime';
-DateTime.addDays(new Date(), 7); // add 7 days
-DateTime.format(new Date(), 'yyyy/MM/dd HH:mm'); // 2022/02/28 10:04
-```
+import { padLeft, padRight } from '@rpdg/revue-utils/String';
 
-
-
-### Array
-
-```typescript
-import { litterN, sortOnProp, shuffle} from '@rpdg/revue-utils/Array';
-
-litterN(50, 100); // [50, 51, 52, ... 99, 100];
-
-let arr = [
-	{ age: 5, name: 'Tom' },
-	{ age: 2, name: 'Jerry' },
-	{ age: 3, name: 'Whoever' },
-];
-sortOnProp(arr, 'age'); // [{age: 2 , name:'Jerry'}, { age: 3, name: 'Whoever' }, {age:5 , name: 'Tom'}]
-
-shuffle(arr);
+padLeft('A', 4); // '000A'
+padRight('A', 4); // 'A000'
 ```
 
 
@@ -351,91 +420,45 @@ is.String("123"); // true
 
 
 
-### Hardware
+### Wechat utils
 
-```typescript
-import { startVibrate , startPeristentVibrate , stopVibrate } from '@rpdg/revue-utils/Hardware';
-startVibrate(1000)   // 振动一次
-startVibrate([1000, 200, 1000, 2000, 400])  //震动多次
-startPeristentVibrate(1000, 1500)  //持续震动
-stopVibrate() //停止震动
+1. convert wechat local image ids to image files
+
+```javascript
+import {localIdsToFiles} from '@rpdg/revue-utils/Wechat';
+wx.chooseImage({
+    success: async function (res: any) {
+		let localIds = res.localIds as string[];
+ 		let filePaires = await localIdsToFiles(localIds);
+	},
+});
 ```
 
+2. initial wechat js sdk
 
-
-### Channel
-
-The Channel<T> class implements a functionality similar to chan[T] in Golang.
-
-```typescript
-
-async function producer(ch: Channel<number>) {
-  for (let i = 0; i < 5; i++) {
-    console.log(`Producing: ${i}`);
-    await ch.send(i);
-	console.log(`Produced: ${i}`);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate production interval
-  }
-  ch.close(); // Close the channel after production is complete
+```javascript
+import { readyAsync } from '@rpdg/revue-utils/Wechat';
+async function init() {
+	await readyAsync(cfg);
 }
-
-async function consumer(ch: Channel<number>) {
-  while (true) {
-    const item = await ch.receive();
-    if (item === undefined) {
-      console.log("Channel closed, stopping consumer.");
-      break;
-    }
-    console.log(`Consuming: ${item}`);
-	await new Promise(resolve => setTimeout(resolve, 500)); // Simulate consumption interval
-  }
-}
-
-// Set the channel capacity to 2
-const ch = new Channel<number>(2); 
-
-// Start the producer and consumer
-producer(ch);
-consumer(ch);
 ```
 
-#### select
+3. wechat share
 
-The select function simulates the multiplexing feature of select in Golang.
-
-```typescript
-async function producer(ch1: Channel<number>, ch2: Channel<number>) {
-  for (let i = 0; i < 3; i++) {
-    console.log(`Producer producing: ${i}`);
-    await ch1.send(i);
-    await ch2.send(i);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-  ch1.close();
-  ch2.close();
+```javascript
+import { shareAsync } from '@rpdg/revue-utils/Wechat';
+async function init() {
+	await shareAsync(['timeline', 'appMessage'], options);
 }
-
-async function consumer(ch1: Channel<number>, ch2: Channel<number>) {
-  while (true) {
-    const result = await select([ch1, ch2]); // multiplexing
-
-    if (result.value === undefined) {
-      console.log("Channel closed, stopping consumer.");
-      break;
-    }
-
-    console.log(`Received from channel: ${result.value}`);
-  }
-}
-
-const ch1 = new Channel<number>(1);
-const ch2 = new Channel<number>(1);
-
-producer(ch1, 1);
-producer(ch2, 2);
-
-consumer(ch1, ch2);
 ```
+
+4. wechat pay
+
+	```js
+	import { payAsync } from '@rpdg/revue-utils/Wechat';
+	// ...
+	await payAsync(options);
+	```
 
 
 
