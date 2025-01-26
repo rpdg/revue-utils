@@ -182,25 +182,38 @@ export const segments = function (from: number, to: number, segments: number, de
  * @param arr 对象数组
  * @param prop 排序字段
  */
-export function sortOnProp<T>(arr: T[], prop: string): T[] {
-	let dup = Array.prototype.slice.call(arr, 0);
+export function sortOnProp<T extends Record<string, any>>(arr: T[], prop: keyof T): T[] {
+	const dup = Array.from(arr);
+	const compare = (a: any, b: any): number => {
+        if (a === b) return 0;
+        return a > b ? 1 : -1;
+    };
 	return dup.sort(function (a, b) {
-		let A = a[prop],
-			nA = isNaN(A),
-			B = b[prop],
-			nB = isNaN(B);
-		//两者皆非number
-		if (nA && nB) {
-			if (A === '') return -1;
-			if (B === '') return 1;
-			return A === B ? 0 : A > B ? 1 : -1;
-		}
-		//a[prop] 非 number, b[prop] 是 number
-		else if (nA) return -1;
-		//a[prop] 是 number, b[prop] 非 number
-		else if (nB) return 1;
-		//a[prop], b[prop]  均是 number
-		return A === B ? 0 : A > B ? 1 : -1;
+		const A = a[prop];
+        const B = b[prop];
+
+        const isANumber = typeof A === 'number' && !isNaN(A);
+        const isBNumber = typeof B === 'number' && !isNaN(B);
+
+        // 两者都是数字
+        if (isANumber && isBNumber) {
+            return compare(A, B);
+        }
+
+        // A 不是数字，B 是数字
+        if (!isANumber && isBNumber) {
+            return -1;
+        }
+
+        // A 是数字，B 不是数字
+        if (isANumber && !isBNumber) {
+            return 1;
+        }
+
+        // 两者都不是数字
+        if (A === '') return -1;
+        if (B === '') return 1;
+        return compare(A, B);
 	});
 }
 

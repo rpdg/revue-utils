@@ -177,36 +177,66 @@ export function getImageSurfix(dataURI: string): string {
 	return '.' + mimeString.substr(6);
 }
 
-export const downloadImage = async (img: HTMLImageElement | string, downName: string = 'download.jpg') => {
+export const downloadImage = async (
+	img: HTMLImageElement | string,
+	downName: string = 'download.jpg'
+): Promise<void> => {
 	let imageURL: string;
-	if (typeof img === 'object' && 'tagName' in img && img.tagName === 'IMG') {
-		img = img.src;
+	try {
+		if (typeof img === 'object' && 'tagName' in img && img.tagName === 'IMG') {
+			img = img.src;
+		}
+		if (typeof img === 'string' && img.startsWith('http')) {
+			const response = await fetch(img);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch image: ${response.statusText}`);
+			}
+			const imageBlog = await response.blob();
+			imageURL = URL.createObjectURL(imageBlog);
+		} else {
+			throw new Error('Invalid image source.');
+		}
+		let link = document.createElement('a');
+		link.href = imageURL!;
+		link.download = downName;
+		link.style.display = 'none';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(imageURL);
+	} catch (error) {
+		console.error('Error downloading image:', error);
+		throw error; // 抛出错误以便外部处理
 	}
-	if (typeof img === 'string' && img.startsWith('http')) {
-		const image = await fetch(img);
-		const imageBlog = await image.blob();
-		imageURL = URL.createObjectURL(imageBlog);
-	}
-	let link = document.createElement('a');
-	link.href = imageURL!;
-	link.download = downName;
-	link.style.display = 'none';
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
 };
 
-export async function checkExists(src: string): Promise<boolean> {
+export async function checkExists(src: string, timeout = 10e3): Promise<boolean> {
 	return new Promise<boolean>((resolve, reject) => {
 		let img: HTMLImageElement = new Image();
+		let timer: number;
+
 		img.onload = () => {
 			resolve(true);
+			cleanup();
 		};
 		img.onerror = (error: any) => {
 			console.error(error);
 			reject(false);
+			cleanup();
 		};
 		img.src = src;
+
+		timer = window.setTimeout(() => {
+            reject(new Error('Image load timed out.'));
+            cleanup(); // 清理引用
+        }, timeout);
+
+		const cleanup = () => {
+			clearTimeout(timer);
+			img.onload = null;
+			img.onerror = null;
+			img.src = ''; // 清空 src 以释放资源
+		};
 	});
 }
 
@@ -225,7 +255,7 @@ export async function checkImageSize(src: string): Promise<{ width: number; heig
 	});
 }
 
-export const checkCanvasMime = (canvas: HTMLCanvasElement) => {
+export const checkCanvasMime = (canvas: HTMLCanvasElement): string[] => {
 	let imageMimes = ['image/png', 'image/bmp', 'image/gif', 'image/jpeg', 'image/tiff']; //Extend as necessary
 	let acceptedMimes: string[] = [];
 	for (let i = 0; i < imageMimes.length; i++) {
@@ -496,15 +526,31 @@ export function erode(
 	return outputData;
 }
 
-export const canvasToImage = (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9) => {
-	canvas.toBlob(
-		(blob) => {
-			let url = URL.createObjectURL(blob!);
-			img.src = url;
-		},
-		'image/jpeg',
-		quality
-	);
+export const canvasToImage = async (canvas: HTMLCanvasElement, img: HTMLImageElement, quality = 0.9): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		canvas.toBlob(
+			(blob) => {
+				if (!blob) {
+					reject(new Error('Failed to convert canvas to blob.'));
+					return;
+				}
+				let url = URL.createObjectURL(blob!);
+				img.src = url;
+
+				img.onload = () => {
+					URL.revokeObjectURL(url);
+					resolve();
+				};
+
+				img.onerror = () => {
+					URL.revokeObjectURL(url);
+					reject(new Error('Failed to load image.'));
+				};
+			},
+			'image/jpeg',
+			quality
+		);
+	});
 };
 
 /**
